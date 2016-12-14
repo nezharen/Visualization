@@ -7,62 +7,115 @@
   <body>
     <script src="d3.v3.js"></script>
     <script>
-      function tarjan(i)
+      function sugiyama()
       {
-        index++;
-        DFN[i] = index;
-	LOW[i] = index;
-	inStack[i] = true;
-	stack.push(i);
-	var j;
-	for (j = 0; j < activityNum; j++)
-	  if ((graph["case_frequency_edge"][i][j] > 0) && (DFN[j] == -1))
-	  {
-	    tarjan(j);
-	    if (LOW[j] < LOW[i])
-	      LOW[i] = LOW[j];
-	  }
-	  else
-	    if (inStack[j] && (DFN[j] < LOW[i]))
-	      LOW[i] = DFN[j];
-	if (DFN[i] == LOW[i])
+        if (subGraph[edgeType] != undefined)
+	  return;
+        subGraph[edgeType] = [];
+	for (var i = 0; i < activityNum; i++)
 	{
-	  belongCount++;
-	  do
-	  {
-	    j = stack.pop();
-	    inStack[j] = false;
-	    belong[j] = belongCount;
-	  }
-	  while (j != i);
+	  subGraph[edgeType].push([]);
+	  for (var j = 0; j < activityNum; j++)
+	    subGraph[edgeType][i].push(0);
 	}
-      }
+	var v = [];
+	for (var i = 0; i < activityNum; i++)
+	  v.push(true);
+	while (true)
+	{
+	  var b;
+	  for (var i = 0; i < activityNum; i++)
+	    if (v[i])
+	    {
+	      b = true;
+	      for (var j = 0; j < activityNum; j++)
+	        if (v[j] && graph[edgeType][i][j] > threshold)
+	        {
+	          b = false;
+		  break;
+	        }
+	      if (!b)
+	      {
+	        b = true;
+	        for (var j = 0; j < activityNum; j++)
+	          if (v[j] && graph[edgeType][j][i] > threshold)
+		  {
+		    b = false;
+		    break;
+		  }
+	      }
+	      if (b)
+	      {
+	        for (var j = 0; j < activityNum; j++)
+	        {
+	          subGraph[edgeType][i][j] = graph[edgeType][i][j];
+		  subGraph[edgeType][j][i] = graph[edgeType][j][i];
+		  graph[edgeType][i][j] = 0;
+		  graph[edgeType][j][i] = 0;
+	        }
+		v[i] = false;
+	      }
+	    }
 
-      function calcLayout()
-      {
-        activityNum = graph["activity_name"].length;
-	DFN = [];
-	LOW = [];
-	stack = [];
-	inStack = [];
-	belong = [];
-	belongCount = -1;
-	index = -1;
-	for (var i = 0; i < activityNum; i++)
-	{
-	  DFN.push(-1);
-	  LOW.push(-1);
-	  inStack.push(false);
-	  belong.push(-1);
+	  var minDiff = -1;
+	  var ti = -1;
+	  var tInNum, tOutNum;
+	  for (var i = 0; i < activityNum; i++)
+	    if (v[i])
+	    {
+	      var inNum = 0;
+	      var outNum = 0;
+	      for (var j = 0; j < activityNum; j++)
+	      {
+	        if (v[j])
+		{
+		  if (graph[edgeType][j][i] > threshold)
+		    inNum++;
+		  if (graph[edgeType][i][j] > threshold)
+		    outNum++;
+		}
+	      }
+	      if (Math.abs(inNum - outNum) > minDiff)
+	      {
+	        minDiff = Math.abs(inNum - outNum);
+		tInNum = inNum;
+		tOutNum = outNum;
+		ti = i;
+	      }
+	    }
+	  if (ti > -1)
+	  {
+	    for (var j = 0; j < activityNum; j++)
+	    {
+	      if (tInNum > tOutNum)
+	        subGraph[edgeType][j][ti] = graph[edgeType][j][ti];
+	      else
+	        subGraph[edgeType][ti][j] = graph[edgeType][ti][j];
+	      graph[edgeType][j][ti] = 0;
+	      graph[edgeType][ti][j] = 0;
+	    }
+	    v[ti] = false;
+	  }
+
+	  b = true;
+	  for (var i = 0; i < activityNum; i++)
+	    if (v[i])
+	    {
+	      b = false;
+	      break;
+	    }
+	  if (b)
+	    break;
 	}
-	for (var i = 0; i < activityNum; i++)
-	  if (DFN[i] == -1)
-	    tarjan(i);
       }
 
       d3.json("graphNet.json", function (error, data) {
         graph = data;
-        calcLayout();
+        activityNum = graph["activity_name"].length;
+	subGraph = {};
+	edgeType = "total_duration_edge";
+	threshold = 0;
+	sugiyama();
       });
     </script>
   </body>
