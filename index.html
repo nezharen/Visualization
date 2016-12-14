@@ -7,9 +7,62 @@
   <body>
     <script src="d3.v3.js"></script>
     <script>
-      d3.json("graphNet.json", function (error, data) {
-        activityNum = data["activity_name"].length;
+      function tarjan(i)
+      {
+        index++;
+        DFN[i] = index;
+	LOW[i] = index;
+	inStack[i] = true;
+	stack.push(i);
+	var j;
+	for (j = 0; j < activityNum; j++)
+	  if ((graph["case_frequency_edge"][i][j] > 0) && (DFN[j] == -1))
+	  {
+	    tarjan(j);
+	    if (LOW[j] < LOW[i])
+	      LOW[i] = LOW[j];
+	  }
+	  else
+	    if (inStack[j] && (DFN[j] < LOW[i]))
+	      LOW[i] = DFN[j];
+	if (DFN[i] == LOW[i])
+	{
+	  belongCount++;
+	  do
+	  {
+	    j = stack.pop();
+	    inStack[j] = false;
+	    belong[j] = belongCount;
+	  }
+	  while (j != i);
+	}
+      }
 
+      function calcLayout()
+      {
+        activityNum = graph["activity_name"].length;
+	DFN = [];
+	LOW = [];
+	stack = [];
+	inStack = [];
+	belong = [];
+	belongCount = -1;
+	index = -1;
+	for (var i = 0; i < activityNum; i++)
+	{
+	  DFN.push(-1);
+	  LOW.push(-1);
+	  inStack.push(false);
+	  belong.push(-1);
+	}
+	for (var i = 0; i < activityNum; i++)
+	  if (DFN[i] == -1)
+	    tarjan(i);
+      }
+
+      d3.json("graphNet.json", function (error, data) {
+        graph = data;
+        calcLayout();
       });
     </script>
   </body>
