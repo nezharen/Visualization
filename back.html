@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <title>myDemo</title>
+    <script src="d3.v3.js"></script>
+  </head>
+  <body>
+
+    <script type="text/javascript">
+
+      var svg = d3.select("body").append("svg");
+      svg.attr("height",1000).attr("width",2000);
+
+      // ********** 绘制方形 **********
+
+      var dataRect = [
+              {x: 500, y: 100, n:"A"},
+              {x: 300, y: 300, n:"B"},
+              {x: 700, y: 300, n:"C"},
+              {x: 500, y: 500, n:"D"},
+              {x: 900, y: 700, n:"E"}
+          ];
+
+      var rectWidth = 300, rectHeight = 100;
+
+      function renderRect(dataRect){
+
+          svg.selectAll("rect")
+            .data(dataRect)
+            .enter().append("rect")
+            .attr("class","activity")
+            .text(function(d){return d.n;});  
+            // .append("span");
+
+          svg.selectAll("rect.activity")
+            .data(dataRect).exit().remove();
+
+          svg.selectAll("rect.activity")
+            .data(dataRect)
+            .attr("stroke","black")
+            .attr("stroke-width",5)
+            .attr("fill","grey")
+            .attr("width",rectWidth)
+            .attr("height",rectHeight)
+            .attr("rx",5)
+            .attr("x",function(d){return d.x;})
+            .attr("y",function(d){return d.y;}) ;
+            
+      }
+
+      renderRect(dataRect);
+      
+
+      // ********** 绘制线条 **********
+      // var defs = svg.append("defs");
+
+      // var arrowMarker = defs.append("marker")
+      //       .attr("id","arrow")
+      //       .attr("markerUnits","strokeWidth")
+      //       .attr("markerWidth","12")
+      //       .attr("markerHeight","12")
+      //       .attr("viewBox","0 0 12 12") 
+      //       .attr("refX","6")
+      //       .attr("refY","6")
+      //       .attr("orient","auto");
+
+      var dataLine = [
+                {x1:650, y1:200, x2:450, y2:300},
+                {x1:650, y1:200, x2:850, y2:300},
+                {x1:450, y1:400, x2:650, y2:500},
+                {x1:850, y1:400, x2:650, y2:500},
+                {x1:650, y1:600, x2:1050, y2:700}
+          ];
+
+      function renderLine(dataLine){
+          svg.selectAll("line")
+            .data(dataLine)
+            .enter().append("line")
+            .attr("class","path")
+
+            .attr("stroke","black")
+            .attr("stroke-width",5)
+            .attr("x1",function(d){return d.x1;})
+            .attr("y1",function(d){return d.y1;})
+            .attr("x2",function(d){return d.x2;})
+            .attr("y2",function(d){return d.y2;})
+            // .attr("marker-end","url(#arrow)");
+            
+          svg.selectAll("line.path")
+            .data(dataLine).exit().remove();
+
+          svg.selectAll("line.path")
+            .data(dataLine)
+      }
+
+      renderLine(dataLine);
+      
+      // ********** 动态圆形 **********
+      var dataCircle = [
+        {x:650, y:100}
+        //,{x:450, y:300}
+      ];
+
+      function renderCircle(dataCircle){
+
+          function teleport(s){
+            s.transition().duration(1000)
+              .style("stroke","yellow")
+              .style("fill","yellow")
+              .style("cy",200)
+            .transition().duration(1500)
+              .style("stroke","blue")
+              .style("fill","blue")
+              .style("cx",850)
+              .style("cy",300)
+            .transition().duration(3000)
+              .style("stroke","pink")
+              .style("fill","pink")
+              .style("cy",400);
+          }
+
+          svg.selectAll("circle")
+            .data(dataCircle)
+            .enter().append("circle")
+            .attr("class","case")
+
+            .attr("stroke","red")
+            .attr("fill","red")
+            .attr("cx",function(d){return d.x;})
+            .attr("cy",function(d){return d.y;})
+            .attr("r", 10)
+            .call(teleport);
+            
+          svg.selectAll("circle.case")
+            .data(dataCircle).exit().remove();
+
+          svg.selectAll("circle.case")
+            .data(dataCircle)
+
+
+      }
+
+      renderCircle(dataCircle);
+
+    </script>
+  </body>
+</html>
+
