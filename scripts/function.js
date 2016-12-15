@@ -52,7 +52,6 @@ function sugiyama()
 						tgraph[i][j] = 0;
 						tgraph[j][i] = 0;
 					}
-					console.log("step 1 " + i);
 					v[i] = false;
 				}
 			}
@@ -92,7 +91,6 @@ function sugiyama()
 				tgraph[j][ti] = 0;
 				tgraph[ti][j] = 0;
 			}
-			console.log("step 2 " + ti);
 			v[ti] = false;
 		}
 
@@ -163,7 +161,7 @@ function topoSort()
 	levelNum++;
 }
 
-function paint()
+function calcLayout()
 {
 	var goldenRation = 1.618;
 	rectWidth = svgWidth / (2 * maxOrder + 1);
@@ -177,9 +175,19 @@ function paint()
 	{
 		var spaceWidth = (svgWidth - rectWidth * orderNum[topoLayout[i]["level"]]) / (orderNum[topoLayout[i]["level"]] + 1);
 		var spaceHeight = (svgHeight - rectHeight * levelNum) / (levelNum + 1);
-		layout.push({"x": spaceWidth * (topoLayout[i]["order"] + 1) + rectWidth * topoLayout[i]["order"], "y": spaceHeight * (topoLayout[i]["level"] + 1) + rectHeight * topoLayout[i]["level"]});
-
+		var x = spaceWidth * (topoLayout[i]["order"] + 1) + rectWidth * topoLayout[i]["order"];
+		var y = spaceHeight * (topoLayout[i]["level"] + 1) + rectHeight * topoLayout[i]["level"];
+		if ((i & 1) == 0)
+			x -= spaceWidth * (1 - 1 / goldenRation);
+		else
+			x += spaceWidth * (1 - 1 / goldenRation);
+		layout.push({"x": x, "y": y});
 	}
+}
+
+function paint()
+{
+	calcLayout();
 	var activityContainers = svg.selectAll("g")
 		.data(layout)
 		.enter()
@@ -201,12 +209,28 @@ function paint()
 		//.text(function(d, i) { return graph["activity_name"][i]; });
 }
 
+function repaint()
+{
+	calcLayout();
+	svg.selectAll("g")
+		.data(layout)
+		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+}
+
+function resize()
+{
+	$("#main").height($(window).height());
+	$("#aside").height($(window).height());
+	svgWidth = $("#svg").width();
+	svgHeight = $("#svg").height();
+}
+
 function init()
 {
-	svgWidth = document.documentElement.clientWidth - 100;
-	svgHeight = document.documentElement.clientHeight - 100;
-	svg = d3.select("body").append("svg").attr("width", svgWidth).attr("height", svgHeight);
+	$.ready();
+	resize();
 	d3.json("data/graphNet.json", function (error, data) {
+			svg = d3.select("#svg")
 			graph = data;
 			activityNum = graph["activity_name"].length;
 			subGraph = {};
@@ -215,7 +239,12 @@ function init()
 			sugiyama();
 			topoSort();
 			paint();
+			$(window).resize(function() {
+				resize();
+				repaint();
 			});
+	});
+
 }
 
 init();
