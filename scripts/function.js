@@ -1,7 +1,5 @@
 function sugiyama()
 {
-	if (subGraph[edgeType] != undefined)
-		return;
 	subGraph[edgeType] = [];
 	var tgraph = [];
 	for (var i = 0; i < activityNum; i++)
@@ -161,6 +159,12 @@ function topoSort()
 	levelNum++;
 }
 
+function calcTopoLayout()
+{
+	sugiyama()
+	topoSort();
+}
+
 function calcLayout()
 {
 	var goldenRation = 1.618;
@@ -177,10 +181,13 @@ function calcLayout()
 		var spaceHeight = (svgHeight - rectHeight * levelNum) / (levelNum + 1);
 		var x = spaceWidth * (topoLayout[i]["order"] + 1) + rectWidth * topoLayout[i]["order"];
 		var y = spaceHeight * (topoLayout[i]["level"] + 1) + rectHeight * topoLayout[i]["level"];
-		if ((i & 1) == 0)
-			x -= spaceWidth * (1 - 1 / goldenRation);
+		var dx = spaceWidth * (1 - 1 / goldenRation) / 2;
+		if (rectWidth * goldenRation / 2 < dx)
+			dx = rectWidth * goldenRation / 2;
+		if ((topoLayout[i]["level"] & 1) == 0)
+			x -= dx;
 		else
-			x += spaceWidth * (1 - 1 / goldenRation);
+			x += dx;
 		layout.push({"x": x, "y": y});
 	}
 }
@@ -215,6 +222,11 @@ function repaint()
 	svg.selectAll("g")
 		.data(layout)
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+	svg.selectAll("rect")
+		.attr("width", rectWidth)
+		.attr("height", rectHeight)
+	svg.selectAll("text")
+		.attr("y", rectHeight / 2)
 }
 
 function resize()
@@ -223,6 +235,21 @@ function resize()
 	$("#aside").height($(window).height());
 	svgWidth = $("#svg").width();
 	svgHeight = $("#svg").height();
+}
+
+function setEdgeType()
+{
+	edgeType = "case_frequency_edge";
+}
+
+function setThreshold()
+{
+	threshold = 0;
+	for (var i = 0; i < activityNum; i++)
+		for (var j = 0; j < activityNum; j++)
+			if (graph[edgeType][i][j] > threshold)
+				threshold = graph[edgeType][i][j];
+	threshold = threshold * $("#threshold")[0].value / 100;
 }
 
 function init()
@@ -234,17 +261,21 @@ function init()
 			graph = data;
 			activityNum = graph["activity_name"].length;
 			subGraph = {};
-			edgeType = "case_frequency_edge";
-			threshold = 0;
-			sugiyama();
-			topoSort();
+			setEdgeType();
+			setThreshold();
+			calcTopoLayout();
 			paint();
 			$(window).resize(function() {
 				resize();
+				repaint();
+			});
+			$("#threshold").change(function() {
+				setThreshold();
+				calcTopoLayout();
 				repaint();
 			});
 	});
 
 }
 
-init();
+$(document).ready(init);
