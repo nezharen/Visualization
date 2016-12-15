@@ -3,11 +3,16 @@ function sugiyama()
 	if (subGraph[edgeType] != undefined)
 		return;
 	subGraph[edgeType] = [];
+	var tgraph = [];
 	for (var i = 0; i < activityNum; i++)
 	{
 		subGraph[edgeType].push([]);
+		tgraph.push([]);
 		for (var j = 0; j < activityNum; j++)
+		{
 			subGraph[edgeType][i].push(0);
+			tgraph[i].push(graph[edgeType][i][j]);
+		}
 	}
 	var v = [];
 	for (var i = 0; i < activityNum; i++)
@@ -20,7 +25,7 @@ function sugiyama()
 			{
 				b = true;
 				for (var j = 0; j < activityNum; j++)
-					if (v[j] && graph[edgeType][i][j] > threshold)
+					if ((i != j) && v[j] && tgraph[i][j] > threshold)
 					{
 						b = false;
 						break;
@@ -29,7 +34,7 @@ function sugiyama()
 				{
 					b = true;
 					for (var j = 0; j < activityNum; j++)
-						if (v[j] && graph[edgeType][j][i] > threshold)
+						if ((i != j) && v[j] && tgraph[j][i] > threshold)
 						{
 							b = false;
 							break;
@@ -39,11 +44,15 @@ function sugiyama()
 				{
 					for (var j = 0; j < activityNum; j++)
 					{
-						subGraph[edgeType][i][j] = graph[edgeType][i][j];
-						subGraph[edgeType][j][i] = graph[edgeType][j][i];
-						graph[edgeType][i][j] = 0;
-						graph[edgeType][j][i] = 0;
+						if (i != j)
+						{
+							subGraph[edgeType][i][j] = tgraph[i][j];
+							subGraph[edgeType][j][i] = tgraph[j][i];
+						}
+						tgraph[i][j] = 0;
+						tgraph[j][i] = 0;
 					}
+					console.log("step 1 " + i);
 					v[i] = false;
 				}
 			}
@@ -57,15 +66,13 @@ function sugiyama()
 				var inNum = 0;
 				var outNum = 0;
 				for (var j = 0; j < activityNum; j++)
-				{
-					if (v[j])
+					if ((i != j) && v[j])
 					{
-						if (graph[edgeType][j][i] > threshold)
+						if (tgraph[j][i] > threshold)
 							inNum++;
-						if (graph[edgeType][i][j] > threshold)
+						if (tgraph[i][j] > threshold)
 							outNum++;
 					}
-				}
 				if (Math.abs(inNum - outNum) > minDiff)
 				{
 					minDiff = Math.abs(inNum - outNum);
@@ -78,13 +85,17 @@ function sugiyama()
 		{
 			for (var j = 0; j < activityNum; j++)
 			{
-				if (tInNum > tOutNum)
-					subGraph[edgeType][j][ti] = graph[edgeType][j][ti];
-				else
-					subGraph[edgeType][ti][j] = graph[edgeType][ti][j];
-				graph[edgeType][j][ti] = 0;
-				graph[edgeType][ti][j] = 0;
+				if (ti != j)
+				{
+					if (tInNum > tOutNum)
+						subGraph[edgeType][j][ti] = tgraph[j][ti];
+					else
+						subGraph[edgeType][ti][j] = tgraph[ti][j];
+				}
+				tgraph[j][ti] = 0;
+				tgraph[ti][j] = 0;
 			}
+			console.log("step 2 " + ti);
 			v[ti] = false;
 		}
 
@@ -104,11 +115,55 @@ function topoSort()
 {
 	topoLayout = [];
 	orderNum = [];
+	levelNum = 0;
+	maxOrder = 1;
+	var v = [];
+	var inNum = [];
 	for (var i = 0; i < activityNum; i++)
-		topoLayout.push({"level": 0, "order": i});
-	orderNum.push(activityNum);
-	levelNum = 1;
-	maxOrder = activityNum;
+	{
+		topoLayout.push({"level": -1, "order": -1});
+		v.push(true);
+		inNum.push(0);
+		for (var j = 2; j < activityNum; j++)
+			if (subGraph[edgeType][j][i] > threshold)
+				inNum[i]++;
+	}
+	orderNum.push(0);
+	topoLayout[0]["level"] = levelNum;
+	topoLayout[0]["order"] = orderNum[levelNum];
+	orderNum[levelNum]++;
+	levelNum++;
+	while (true)
+	{
+		var stack = [];
+		orderNum.push(0);
+		for (var i = 2; i < activityNum; i++)
+			if (v[i] && (inNum[i] == 0))
+			{
+				topoLayout[i]["level"] = levelNum;
+				topoLayout[i]["order"] = orderNum[levelNum];
+				orderNum[levelNum]++;
+				if (orderNum[levelNum] > maxOrder)
+					maxOrder = orderNum[levelNum];
+				stack.push(i);
+			}
+		if (stack.length == 0)
+			break;
+		while (stack.length > 0)
+		{
+			var i = stack.pop();
+			v[i] = false;
+			for (var j = 2; j < activityNum; j++)
+				if (subGraph[edgeType][i][j] > threshold)
+					inNum[j]--;
+		}
+		levelNum++;
+	}
+	orderNum.push(0);
+	topoLayout[1]["level"] = levelNum;
+	topoLayout[1]["order"] = orderNum[levelNum];
+	orderNum[levelNum]++;
+	levelNum++;
 }
 
 function paint()
@@ -145,7 +200,8 @@ function paint()
 		.attr("y", rectHeight / 2)
 		.attr("fill", "white")
 		.attr("font-weight", "bold")
-		.text(function(d, i) { return graph["activity_name"][i]; });
+		.text(function(d, i) { return i; });
+		//.text(function(d, i) { return graph["activity_name"][i]; });
 }
 
 function init()
@@ -157,7 +213,7 @@ function init()
 			graph = data;
 			activityNum = graph["activity_name"].length;
 			subGraph = {};
-			edgeType = "total_duration_edge";
+			edgeType = "case_frequency_edge";
 			threshold = 0;
 			sugiyama();
 			topoSort();
