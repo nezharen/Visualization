@@ -11,7 +11,10 @@ function sugiyama()
 		for (var j = 0; j < activityNum; j++)
 		{
 			subGraph[edgeType][i].push(0);
-			tgraph[i].push(graph[edgeType][i][j]);
+			if (i == j)
+				tgraph[i].push(0);
+			else
+				tgraph[i].push(graph[edgeType][i][j]);
 		}
 	}
 	var v = [];
@@ -25,7 +28,7 @@ function sugiyama()
 			{
 				b = true;
 				for (var j = 0; j < activityNum; j++)
-					if ((i != j) && v[j] && tgraph[i][j] > threshold)
+					if (v[j] && tgraph[i][j] > threshold)
 					{
 						b = false;
 						break;
@@ -34,7 +37,7 @@ function sugiyama()
 				{
 					b = true;
 					for (var j = 0; j < activityNum; j++)
-						if ((i != j) && v[j] && tgraph[j][i] > threshold)
+						if (v[j] && tgraph[j][i] > threshold)
 						{
 							b = false;
 							break;
@@ -44,11 +47,8 @@ function sugiyama()
 				{
 					for (var j = 0; j < activityNum; j++)
 					{
-						if (i != j)
-						{
-							subGraph[edgeType][i][j] = tgraph[i][j];
-							subGraph[edgeType][j][i] = tgraph[j][i];
-						}
+						subGraph[edgeType][i][j] = tgraph[i][j];
+						subGraph[edgeType][j][i] = tgraph[j][i];
 						tgraph[i][j] = 0;
 						tgraph[j][i] = 0;
 					}
@@ -66,7 +66,7 @@ function sugiyama()
 				var inNum = 0;
 				var outNum = 0;
 				for (var j = 0; j < activityNum; j++)
-					if ((i != j) && v[j])
+					if (v[j])
 					{
 						if (tgraph[j][i] > threshold)
 							inNum++;
@@ -85,13 +85,10 @@ function sugiyama()
 		{
 			for (var j = 0; j < activityNum; j++)
 			{
-				if (ti != j)
-				{
-					if (tInNum > tOutNum)
-						subGraph[edgeType][j][ti] = tgraph[j][ti];
-					else
-						subGraph[edgeType][ti][j] = tgraph[ti][j];
-				}
+				if (tInNum > tOutNum)
+					subGraph[edgeType][j][ti] = tgraph[j][ti];
+				else
+					subGraph[edgeType][ti][j] = tgraph[ti][j];
 				tgraph[j][ti] = 0;
 				tgraph[ti][j] = 0;
 			}
