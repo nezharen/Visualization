@@ -1,5 +1,7 @@
-function sugiyama()
+function sugiyama(lazy)
 {
+	if (lazy && (subGraph[edgeType] != undefined))
+		return;
 	subGraph[edgeType] = [];
 	var tgraph = [];
 	for (var i = 0; i < activityNum; i++)
@@ -104,9 +106,11 @@ function sugiyama()
 	}
 }
 
-function topoSort()
+function topoSort(lazy)
 {
-	topoLayout = [];
+	if (lazy && (topoLayout[edgeType] != undefined))
+		return;
+	topoLayout[edgeType] = [];
 	orderNum = [];
 	levelNum = 0;
 	maxOrder = 1;
@@ -114,7 +118,7 @@ function topoSort()
 	var inNum = [];
 	for (var i = 0; i < activityNum; i++)
 	{
-		topoLayout.push({"level": -1, "order": -1});
+		topoLayout[edgeType].push({"level": -1, "order": -1});
 		v.push(true);
 		inNum.push(0);
 		for (var j = 2; j < activityNum; j++)
@@ -122,8 +126,8 @@ function topoSort()
 				inNum[i]++;
 	}
 	orderNum.push(0);
-	topoLayout[0]["level"] = levelNum;
-	topoLayout[0]["order"] = orderNum[levelNum];
+	topoLayout[edgeType][0]["level"] = levelNum;
+	topoLayout[edgeType][0]["order"] = orderNum[levelNum];
 	orderNum[levelNum]++;
 	levelNum++;
 	while (true)
@@ -133,8 +137,8 @@ function topoSort()
 		for (var i = 2; i < activityNum; i++)
 			if (v[i] && (inNum[i] == 0))
 			{
-				topoLayout[i]["level"] = levelNum;
-				topoLayout[i]["order"] = orderNum[levelNum];
+				topoLayout[edgeType][i]["level"] = levelNum;
+				topoLayout[edgeType][i]["order"] = orderNum[levelNum];
 				orderNum[levelNum]++;
 				if (orderNum[levelNum] > maxOrder)
 					maxOrder = orderNum[levelNum];
@@ -153,20 +157,22 @@ function topoSort()
 		levelNum++;
 	}
 	orderNum.push(0);
-	topoLayout[1]["level"] = levelNum;
-	topoLayout[1]["order"] = orderNum[levelNum];
+	topoLayout[edgeType][1]["level"] = levelNum;
+	topoLayout[edgeType][1]["order"] = orderNum[levelNum];
 	orderNum[levelNum]++;
 	levelNum++;
 }
 
-function calcTopoLayout()
+function calcTopoLayout(lazy)
 {
-	sugiyama()
-	topoSort();
+	sugiyama(lazy)
+	topoSort(lazy);
 }
 
-function calcLayout()
+function calcLayout(lazy)
 {
+	if (lazy && (layout[edgeType] != undefined) && (pathLayout[edgeType] != undefined))
+		return;
 	var goldenRation = 1.618;
 	rectWidth = svgWidth / (2 * maxOrder + 1);
 	rectHeight = svgHeight / (2 * levelNum + 1);
@@ -174,59 +180,100 @@ function calcLayout()
 		rectWidth = rectHeight * goldenRation;
 	else
 		rectHeight = rectWidth / goldenRation;
-	layout = [];
+	layout[edgeType] = [];
 	for (var i = 0; i < activityNum; i++)
 	{
-		var spaceWidth = (svgWidth - rectWidth * orderNum[topoLayout[i]["level"]]) / (orderNum[topoLayout[i]["level"]] + 1);
+		var spaceWidth = (svgWidth - rectWidth * orderNum[topoLayout[edgeType][i]["level"]]) / (orderNum[topoLayout[edgeType][i]["level"]] + 1);
 		var spaceHeight = (svgHeight - rectHeight * levelNum) / (levelNum + 1);
-		var x = spaceWidth * (topoLayout[i]["order"] + 1) + rectWidth * topoLayout[i]["order"];
-		var y = spaceHeight * (topoLayout[i]["level"] + 1) + rectHeight * topoLayout[i]["level"];
+		var x = spaceWidth * (topoLayout[edgeType][i]["order"] + 1) + rectWidth * topoLayout[edgeType][i]["order"];
+		var y = spaceHeight * (topoLayout[edgeType][i]["level"] + 1) + rectHeight * topoLayout[edgeType][i]["level"];
 		var dx = spaceWidth * (1 - 1 / goldenRation) / 2;
 		if (rectWidth * goldenRation / 2 < dx)
 			dx = rectWidth * goldenRation / 2;
-		if ((topoLayout[i]["level"] & 1) == 0)
+		if ((topoLayout[edgeType][i]["level"] & 1) == 0)
 			x -= dx;
 		else
 			x += dx;
-		layout.push({"x": x, "y": y});
+		layout[edgeType].push({"x": x, "y": y});
+	}
+	pathLayout[edgeType] = [];
+	for (var i = 0; i < activityNum; i++)
+	{
+		pathLayout[edgeType].push([]);
+		for (var j = 0; j < activityNum; j++)
+		{
+			pathLayout[edgeType][i].push([]);
+			if (graph[edgeType][i][j] > threshold)
+			{
+				pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y + rectHeight});
+				pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y});
+			}
+		}
 	}
 }
 
 function paint()
 {
 	calcLayout();
-	var activityContainers = svg.selectAll("g")
-		.data(layout)
+	activityContainers = svg.selectAll("g")
+		.data(layout[edgeType])
 		.enter()
 		.append("g")
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-	activityContainers.append("rect")
+	activityRects = activityContainers.append("rect")
 		.attr("width", rectWidth)
 		.attr("height", rectHeight)
 		.attr("stroke", "black")
 		.attr("stroke-width", 2)
 		.attr("rx", 5)
 		.attr("fill", "#4d97d6");
-	activityContainers.append("text")
+	activityTexts = activityContainers.append("text")
 		.attr("x", 10)
 		.attr("y", rectHeight / 2)
 		.attr("fill", "white")
 		.attr("font-weight", "bold")
 		.text(function(d, i) { return i; });
 		//.text(function(d, i) { return graph["activity_name"][i]; });
+	var lineFunction = d3.svg.line()
+		.x(function(d) { return d.x; })
+		.y(function(d) { return d.y; })
+		.interpolate("basis");
+	edgePaths = [];
+	for (var i = 0; i < activityNum; i++)
+	{
+		edgePaths.push([]);
+		for (var j = 0; j < activityNum; j++)
+		{
+			edgePaths[i].push([]);
+			edgePaths[i][j] = svg.append("path")
+				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
+				.attr("stroke", "blue")
+				.attr("stroke-width", 2)
+				.attr("fill", "none")
+				.attr("marker-end","url(#arrow)");
+		}
+	}
 }
 
 function repaint()
 {
 	calcLayout();
-	svg.selectAll("g")
-		.data(layout)
+	activityContainers
+		.data(layout[edgeType])
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-	svg.selectAll("rect")
+	activityRects
 		.attr("width", rectWidth)
-		.attr("height", rectHeight)
-	svg.selectAll("text")
-		.attr("y", rectHeight / 2)
+		.attr("height", rectHeight);
+	activityTexts
+		.attr("y", rectHeight / 2);
+	var lineFunction = d3.svg.line()
+		.x(function(d) { return d.x; })
+		.y(function(d) { return d.y; })
+		.interpolate("linear");
+	for (var i = 0; i < activityNum; i++)
+		for (var j = 0; j < activityNum; j++)
+			edgePaths[i][j]
+				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
 }
 
 function resize()
@@ -254,16 +301,30 @@ function setThreshold()
 
 function init()
 {
-	$.ready();
-	resize();
 	d3.json("data/graphNet.json", function (error, data) {
-			svg = d3.select("#svg")
+			svg = d3.select("#svg");
+			svg.append("defs").append("marker")
+				.attr("id","arrow")
+				.attr("markerUnits","strokeWidth")
+				.attr("markerWidth","12")
+				.attr("markerHeight","12")
+				.attr("viewBox","0 0 12 12") 
+				.attr("refX","6")
+				.attr("refY","6")
+				.attr("orient","auto")
+				.append("path")
+				.attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
+				.attr("fill", "black");
 			graph = data;
 			activityNum = graph["activity_name"].length;
 			subGraph = {};
+			topoLayout = {};
+			layout = {};
+			pathLayout = {};
 			setEdgeType();
 			setThreshold();
-			calcTopoLayout();
+			calcTopoLayout(true);
+			resize();
 			paint();
 			$(window).resize(function() {
 				resize();
@@ -271,7 +332,7 @@ function init()
 			});
 			$("#threshold").change(function() {
 				setThreshold();
-				calcTopoLayout();
+				calcTopoLayout(false);
 				repaint();
 			});
 	});
