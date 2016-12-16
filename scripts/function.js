@@ -46,12 +46,13 @@ function sugiyama(lazy)
 				if (b)
 				{
 					for (var j = 0; j < activityNum; j++)
-					{
-						subGraph[edgeType][i][j] = tgraph[i][j];
-						subGraph[edgeType][j][i] = tgraph[j][i];
-						tgraph[i][j] = 0;
-						tgraph[j][i] = 0;
-					}
+						if (v[j])
+						{
+							subGraph[edgeType][i][j] = tgraph[i][j];
+							subGraph[edgeType][j][i] = tgraph[j][i];
+							tgraph[i][j] = 0;
+							tgraph[j][i] = 0;
+						}
 					v[i] = false;
 				}
 			}
@@ -83,14 +84,15 @@ function sugiyama(lazy)
 		if (ti > -1)
 		{
 			for (var j = 0; j < activityNum; j++)
-			{
-				if (tInNum > tOutNum)
-					subGraph[edgeType][j][ti] = tgraph[j][ti];
-				else
-					subGraph[edgeType][ti][j] = tgraph[ti][j];
-				tgraph[j][ti] = 0;
-				tgraph[ti][j] = 0;
-			}
+				if (v[j])
+				{
+					if (tInNum > tOutNum)
+						subGraph[edgeType][j][ti] = tgraph[j][ti];
+					else
+						subGraph[edgeType][ti][j] = tgraph[ti][j];
+					tgraph[j][ti] = 0;
+					tgraph[ti][j] = 0;
+				}
 			v[ti] = false;
 		}
 
@@ -203,18 +205,35 @@ function calcLayout(lazy)
 		for (var j = 0; j < activityNum; j++)
 		{
 			pathLayout[edgeType][i].push([]);
-			if (graph[edgeType][i][j] > threshold)
-			{
-				pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y + rectHeight});
-				pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y});
-			}
+			if ((i != j) && (graph[edgeType][i][j] > threshold))
+				if (topoLayout[edgeType][i]["level"] < topoLayout[edgeType][j]["level"])
+				{
+					pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y + rectHeight});
+					pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y});
+				}
+				else
+					if (topoLayout[edgeType][i]["level"] > topoLayout[edgeType][j]["level"])
+					{
+						pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y});
+						pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y + rectHeight});
+					}
+					else
+						if (topoLayout[edgeType][i]["order"] < topoLayout[edgeType][j]["order"])
+						{
+							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth, "y": layout[edgeType][i].y + rectHeight / 2});
+							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x, "y": layout[edgeType][j].y + rectHeight / 2});
+						}
+						else
+						{
+							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
+							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth, "y": layout[edgeType][j].y + rectHeight / 2});
+						}
 		}
 	}
 }
 
 function paint()
 {
-	calcLayout();
 	activityContainers = svg.selectAll("g")
 		.data(layout[edgeType])
 		.enter()
@@ -257,7 +276,6 @@ function paint()
 
 function repaint()
 {
-	calcLayout();
 	activityContainers
 		.data(layout[edgeType])
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
@@ -325,14 +343,17 @@ function init()
 			setThreshold();
 			calcTopoLayout(true);
 			resize();
+			calcLayout();
 			paint();
 			$(window).resize(function() {
 				resize();
+				calcLayout();
 				repaint();
 			});
 			$("#threshold").change(function() {
 				setThreshold();
 				calcTopoLayout(false);
+				calcLayout();
 				repaint();
 			});
 	});
