@@ -198,6 +198,11 @@ function calcLayout(lazy)
 			x += dx;
 		layout[edgeType].push({"x": x, "y": y});
 	}
+	calcPathLayout();
+}
+
+function calcPathLayout()
+{
 	pathLayout[edgeType] = [];
 	for (var i = 0; i < activityNum; i++)
 	{
@@ -234,11 +239,18 @@ function calcLayout(lazy)
 
 function paint()
 {
+	var drag = d3.behavior.drag().on("drag", function(d, i) {
+		layout[edgeType][i].x = d3.event.x;
+		layout[edgeType][i].y = d3.event.y;
+		calcPathLayout();
+		repaint();
+	});
 	activityContainers = svg.selectAll("g")
 		.data(layout[edgeType])
 		.enter()
 		.append("g")
-		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
+		.call(drag);
 	activityRects = activityContainers.append("rect")
 		.attr("width", rectWidth)
 		.attr("height", rectHeight)
@@ -266,7 +278,7 @@ function paint()
 			edgePaths[i].push([]);
 			edgePaths[i][j] = svg.append("path")
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
-				.attr("stroke", "blue")
+				.attr("stroke", "black")
 				.attr("stroke-width", 2)
 				.attr("fill", "none")
 				.attr("marker-end","url(#arrow)");
