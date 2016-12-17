@@ -183,6 +183,7 @@ function calcLayout(lazy)
 	else
 		rectHeight = rectWidth / goldenRation;
 	layout[edgeType] = [];
+	minSpaceWidth = 1e9;
 	for (var i = 0; i < activityNum; i++)
 	{
 		var spaceWidth = (svgWidth - rectWidth * orderNum[topoLayout[edgeType][i]["level"]]) / (orderNum[topoLayout[edgeType][i]["level"]] + 1);
@@ -190,6 +191,8 @@ function calcLayout(lazy)
 		var x = spaceWidth * (topoLayout[edgeType][i]["order"] + 1) + rectWidth * topoLayout[edgeType][i]["order"];
 		var y = spaceHeight * (topoLayout[edgeType][i]["level"] + 1) + rectHeight * topoLayout[edgeType][i]["level"];
 		var dx = spaceWidth * (1 - 1 / goldenRation) / 2;
+		if (spaceWidth < minSpaceWidth)
+			minSpaceWidth = spaceWidth;
 		if (rectWidth * goldenRation / 2 < dx)
 			dx = rectWidth * goldenRation / 2;
 		if ((topoLayout[edgeType][i]["level"] & 1) == 0)
@@ -211,35 +214,51 @@ function calcPathLayout()
 		{
 			pathLayout[edgeType][i].push([]);
 			if (graph[edgeType][i][j] > threshold)
-			{
-				var dx = layout[edgeType][j].x - layout[edgeType][i].x;
-				var dy = layout[edgeType][j].y - layout[edgeType][i].y;
-				var sin = dy / Math.sqrt(dx * dx + dy * dy);
-				var cos = dx / Math.sqrt(dx * dx + dy * dy);
-				var t = Math.sqrt(2) / 2;
-				if (sin >= t)
+				if (i == j)
 				{
-					pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y + rectHeight});
-					pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y});
+					var t = rectWidth / 2;
+					if (minSpaceWidth / 2 < t)
+						t = minSpaceWidth / 2;
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t / 2, "y": layout[edgeType][i].y + rectHeight / 2 - t / 2});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t, "y": layout[edgeType][i].y + rectHeight / 2});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t / 2, "y": layout[edgeType][i].y + rectHeight / 2 + t / 2});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
 				}
 				else
-					if (sin <= -t)
+				{
+					var dx = layout[edgeType][j].x - layout[edgeType][i].x;
+					var dy = layout[edgeType][j].y - layout[edgeType][i].y;
+					var sin = dy / Math.sqrt(dx * dx + dy * dy);
+					var cos = dx / Math.sqrt(dx * dx + dy * dy);
+					var t = Math.sqrt(2) / 2;
+					if (sin >= t)
 					{
-						pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y});
-						pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y + rectHeight});
+						pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y + rectHeight});
+						pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": (layout[edgeType][i].y + layout[edgeType][j].y + rectHeight) / 2});
+						pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y});
 					}
 					else
-						if (cos >= t)
+						if (sin <= -t)
 						{
-							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth, "y": layout[edgeType][i].y + rectHeight / 2});
-							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x, "y": layout[edgeType][j].y + rectHeight / 2});
+							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y});
+							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": (layout[edgeType][i].y + layout[edgeType][j].y + rectHeight) / 2});
+							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y + rectHeight});
 						}
 						else
-						{
-							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
-							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth, "y": layout[edgeType][j].y + rectHeight / 2});
-						}
-			}
+							if (cos >= t)
+							{
+								pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth, "y": layout[edgeType][i].y + rectHeight / 2});
+								pathLayout[edgeType][i][j].push({"x": (layout[edgeType][i].x + layout[edgeType][j].x + rectWidth) / 2, "y": layout[edgeType][j].y + rectHeight / 2});
+								pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x, "y": layout[edgeType][j].y + rectHeight / 2});
+							}
+							else
+							{
+								pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
+								pathLayout[edgeType][i][j].push({"x": (layout[edgeType][i].x + layout[edgeType][j].x + rectWidth) / 2, "y": layout[edgeType][j].y + rectHeight / 2});
+								pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth, "y": layout[edgeType][j].y + rectHeight / 2});
+							}
+				}
 		}
 	}
 }
@@ -247,8 +266,15 @@ function calcPathLayout()
 function paint()
 {
 	var drag = d3.behavior.drag().on("drag", function(d, i) {
-		layout[edgeType][i].x += d3.event.dx;
-		layout[edgeType][i].y += d3.event.dy;
+		var t = rectWidth / 2;
+		if (minSpaceWidth / 2 < t)
+			t = minSpaceWidth / 2;
+		var tx = layout[edgeType][i].x + d3.event.dx;
+		var ty = layout[edgeType][i].y + d3.event.dy;
+		if ((tx - t) < 0 || ty < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
+			return;
+		layout[edgeType][i].x = tx;
+		layout[edgeType][i].y = ty;;
 		calcPathLayout();
 		repaint();
 	});
@@ -306,7 +332,7 @@ function repaint()
 	var lineFunction = d3.svg.line()
 		.x(function(d) { return d.x; })
 		.y(function(d) { return d.y; })
-		.interpolate("linear");
+		.interpolate("basis");
 	for (var i = 0; i < activityNum; i++)
 		for (var j = 0; j < activityNum; j++)
 			edgePaths[i][j]
@@ -317,8 +343,17 @@ function resize()
 {
 	$("#main").height($(window).height());
 	$("#aside").height($(window).height());
+	var originSvgWidth = svgWidth;
+	var originSvgHeight = svgHeight;
 	svgWidth = $("#svg").width();
 	svgHeight = $("#svg").height();
+	rectWidth *= (svgWidth / originSvgWidth);
+	rectHeight *= (svgHeight / originSvgHeight);
+	for (var i = 0; i < activityNum; i++)
+	{
+		layout[edgeType][i].x *= (svgWidth / originSvgWidth);
+		layout[edgeType][i].y *= (svgHeight / originSvgHeight);
+	}
 }
 
 function setEdgeType()
@@ -358,15 +393,18 @@ function init()
 			topoLayout = {};
 			layout = {};
 			pathLayout = {};
+			$("#main").height($(window).height());
+			$("#aside").height($(window).height());
+			svgWidth = $("#svg").width();
+			svgHeight = $("#svg").height();
 			setEdgeType();
 			setThreshold();
 			calcTopoLayout(true);
-			resize();
 			calcLayout();
 			paint();
 			$(window).resize(function() {
 				resize();
-				calcLayout();
+				calcPathLayout();
 				repaint();
 			});
 			$("#threshold").change(function() {
