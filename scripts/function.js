@@ -240,8 +240,8 @@ function calcPathLayout()
 function paint()
 {
 	var drag = d3.behavior.drag().on("drag", function(d, i) {
-		layout[edgeType][i].x = d3.event.x;
-		layout[edgeType][i].y = d3.event.y;
+		layout[edgeType][i].x += d3.event.dx;
+		layout[edgeType][i].y += d3.event.dy;
 		calcPathLayout();
 		repaint();
 	});
