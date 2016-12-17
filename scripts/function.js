@@ -210,20 +210,26 @@ function calcPathLayout()
 		for (var j = 0; j < activityNum; j++)
 		{
 			pathLayout[edgeType][i].push([]);
-			if ((i != j) && (graph[edgeType][i][j] > threshold))
-				if (topoLayout[edgeType][i]["level"] < topoLayout[edgeType][j]["level"])
+			if (graph[edgeType][i][j] > threshold)
+			{
+				var dx = layout[edgeType][j].x - layout[edgeType][i].x;
+				var dy = layout[edgeType][j].y - layout[edgeType][i].y;
+				var sin = dy / Math.sqrt(dx * dx + dy * dy);
+				var cos = dx / Math.sqrt(dx * dx + dy * dy);
+				var t = Math.sqrt(2) / 2;
+				if (sin >= t)
 				{
 					pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y + rectHeight});
 					pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y});
 				}
 				else
-					if (topoLayout[edgeType][i]["level"] > topoLayout[edgeType][j]["level"])
+					if (sin <= -t)
 					{
 						pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y});
 						pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y + rectHeight});
 					}
 					else
-						if (topoLayout[edgeType][i]["order"] < topoLayout[edgeType][j]["order"])
+						if (cos >= t)
 						{
 							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth, "y": layout[edgeType][i].y + rectHeight / 2});
 							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x, "y": layout[edgeType][j].y + rectHeight / 2});
@@ -233,6 +239,7 @@ function calcPathLayout()
 							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
 							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth, "y": layout[edgeType][j].y + rectHeight / 2});
 						}
+			}
 		}
 	}
 }
