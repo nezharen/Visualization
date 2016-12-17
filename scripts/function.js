@@ -219,11 +219,11 @@ function calcPathLayout()
 					var t = rectWidth / 2;
 					if (minSpaceWidth / 2 < t)
 						t = minSpaceWidth / 2;
-					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
-					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t / 2, "y": layout[edgeType][i].y + rectHeight / 2 - t / 2});
-					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t, "y": layout[edgeType][i].y + rectHeight / 2});
-					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t / 2, "y": layout[edgeType][i].y + rectHeight / 2 + t / 2});
-					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y - t});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t, "y": layout[edgeType][i].y - t});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t, "y": layout[edgeType][i].y});
+					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y});
 				}
 				else
 				{
@@ -271,8 +271,16 @@ function paint()
 			t = minSpaceWidth / 2;
 		var tx = layout[edgeType][i].x + d3.event.dx;
 		var ty = layout[edgeType][i].y + d3.event.dy;
-		if ((tx - t) < 0 || ty < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
-			return;
+		if (graph[edgeType][i][i] > threshold)
+		{
+			if ((tx - t) < 0 || (ty - t) < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
+				return;
+		}
+		else
+		{
+			if (tx < 0 || ty < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
+				return;
+		}
 		layout[edgeType][i].x = tx;
 		layout[edgeType][i].y = ty;;
 		calcPathLayout();
