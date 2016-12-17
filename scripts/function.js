@@ -367,16 +367,26 @@ function resize()
 function setEdgeType()
 {
 	edgeType = "case_frequency_edge";
+	if (edgeWeights[edgeType] != undefined)
+		return;
+	edgeWeights[edgeType] = [];
+	for (var i = 0; i < activityNum; i++)
+		for (var j = 0; j < activityNum; j++)
+			edgeWeights[edgeType].push(graph[edgeType][i][j]);
+	for (var i = 1; i < activityNum * activityNum; i++)
+		for (var j = 0; j < activityNum * activityNum - i; j++)
+			if (edgeWeights[edgeType][j] > edgeWeights[edgeType][j + 1])
+			{
+				var t = edgeWeights[edgeType][j];
+				edgeWeights[edgeType][j] = edgeWeights[edgeType][j + 1];
+				edgeWeights[edgeType][j + 1] = t;
+			}
 }
 
 function setThreshold()
 {
-	threshold = 0;
-	for (var i = 0; i < activityNum; i++)
-		for (var j = 0; j < activityNum; j++)
-			if (graph[edgeType][i][j] > threshold)
-				threshold = graph[edgeType][i][j];
-	threshold = threshold * $("#threshold")[0].value / 100;
+	threshold = (activityNum * activityNum - 1) * $("#threshold")[0].value / 100;
+	threshold = edgeWeights[edgeType][parseInt(threshold, 10)];
 }
 
 function init()
@@ -397,6 +407,7 @@ function init()
 				.attr("fill", "black");
 			graph = data;
 			activityNum = graph["activity_name"].length;
+			edgeWeights = {};
 			subGraph = {};
 			topoLayout = {};
 			layout = {};
