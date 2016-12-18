@@ -349,7 +349,7 @@ function repaint()
 
 function resize()
 {
-	$("#main").height($(window).height());
+	$("#main").height($(window).height() - 20);
 	var originSvgWidth = svgWidth;
 	var originSvgHeight = svgHeight;
 	svgWidth = $("#svg").width();
@@ -411,7 +411,7 @@ function init()
 			topoLayout = {};
 			layout = {};
 			pathLayout = {};
-			$("#main").height($(window).height());
+			$("#main").height($(window).height() - 20);
 			svgWidth = $("#svg").width();
 			svgHeight = $("#svg").height();
 			setEdgeType();
