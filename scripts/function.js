@@ -350,7 +350,6 @@ function repaint()
 function resize()
 {
 	$("#main").height($(window).height());
-	$("#aside").height($(window).height());
 	var originSvgWidth = svgWidth;
 	var originSvgHeight = svgHeight;
 	svgWidth = $("#svg").width();
@@ -413,7 +412,6 @@ function init()
 			layout = {};
 			pathLayout = {};
 			$("#main").height($(window).height());
-			$("#aside").height($(window).height());
 			svgWidth = $("#svg").width();
 			svgHeight = $("#svg").height();
 			setEdgeType();
