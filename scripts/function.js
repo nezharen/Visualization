@@ -190,11 +190,11 @@ function calcLayout(lazy)
 		var spaceHeight = (svgHeight - rectHeight * levelNum) / (levelNum + 1);
 		var x = spaceWidth * (topoLayout[edgeType][i]["order"] + 1) + rectWidth * topoLayout[edgeType][i]["order"];
 		var y = spaceHeight * (topoLayout[edgeType][i]["level"] + 1) + rectHeight * topoLayout[edgeType][i]["level"];
-		var dx = spaceWidth * (1 - 1 / goldenRation) / 2;
+		var dx = spaceWidth * (1 - 1 / goldenRation) / 2 + Math.random() / 2 * spaceWidth;
 		if (spaceWidth < minSpaceWidth)
 			minSpaceWidth = spaceWidth;
-		if (rectWidth * goldenRation / 2 < dx)
-			dx = rectWidth * goldenRation / 2;
+		//if (rectWidth * goldenRation / 2 < dx)
+			//dx = rectWidth * goldenRation / 2;
 		if ((topoLayout[edgeType][i]["level"] & 1) == 0)
 			x -= dx;
 		else
@@ -216,9 +216,7 @@ function calcPathLayout()
 			if (graph[edgeType][i][j] > threshold)
 				if (i == j)
 				{
-					var t = rectWidth / 2;
-					if (minSpaceWidth / 2 < t)
-						t = minSpaceWidth / 2;
+					var t = Math.min(rectWidth / 2, minSpaceWidth / 2);
 					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y});
 					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y - t});
 					pathLayout[edgeType][i][i].push({"x": layout[edgeType][i].x - t, "y": layout[edgeType][i].y - t});
@@ -271,18 +269,28 @@ function calcPathLayout()
 						var dtx = 0;
 						var dty = 0;
 						for (var p = 0; p < activityNum; p++)
-						{
-							var ddtx = tx - (layout[edgeType][p].x + rectWidth / 2);
-							var ddty = ty - (layout[edgeType][i].y + rectHeight / 2);
-							var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
-							ddtx /= (dis * dis * dis * dis);
-							ddty /= (dis * dis * dis * dis);
-							dtx += ddtx;
-							dty += ddty;
-						}
-						console.log(5000 * dtx + " " + 5000 * dty);
-						tx += 5000000 * dtx;
-						ty += 5000000 * dty;
+							if (p != i && p != j)
+							{
+								var ddtx = tx - (layout[edgeType][p].x + rectWidth / 2);
+								var ddty = ty - (layout[edgeType][p].y + rectHeight / 2);
+								if (Math.abs((ddtx * dx + ddty * dy) / Math.sqrt(ddtx * ddtx + ddty * ddty) / Math.sqrt(dx * dx + dy * dy)) > t)
+								{
+									var swaper = ddtx;
+									ddtx = ddty;
+									ddty = swaper;
+								}
+								var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
+								ddtx *= 100000 / (dis * dis * dis);
+								ddty *= 100000 /(dis * dis * dis);
+								if (Math.abs(ddtx) > Math.min(minSpaceWidth, svgWidth / 10))
+									ddtx = ddtx / Math.abs(ddtx) * Math.min(minSpaceWidth, svgWidth / 10);
+								if (Math.abs(ddty) > Math.min(minSpaceWidth, svgWidth / 10))
+									ddty = ddty / Math.abs(ddty) * Math.min(minSpaceWidth, svgWidth / 10);
+								dtx += ddtx;
+								dty += ddty;
+							}
+						tx += dtx;
+						ty += dty;
 						pathLayout[edgeType][i][j].push({"x": tx, "y": ty});
 					}
 					pathLayout[edgeType][i][j].push(end);
@@ -294,9 +302,7 @@ function calcPathLayout()
 function paint()
 {
 	var drag = d3.behavior.drag().on("drag", function(d, i) {
-		var t = rectWidth / 2;
-		if (minSpaceWidth / 2 < t)
-			t = minSpaceWidth / 2;
+		var t = Math.min(rectWidth / 2, minSpaceWidth / 2);
 		var tx = layout[edgeType][i].x + d3.event.dx;
 		var ty = layout[edgeType][i].y + d3.event.dy;
 		if (graph[edgeType][i][i] > threshold)
