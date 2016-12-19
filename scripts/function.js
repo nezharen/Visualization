@@ -478,6 +478,101 @@ function init()
 			});
 	});
 
+
+	d3.json("backend/animation.json", function (error, data) {
+		animationJson = data;
+
+		time = 0;		//当前时刻
+		timeMax = 1000;	//动画总时长
+		period = 10;	//每次刷新变化时间
+
+		frame = animationJson.begin;	//当前帧数
+
+		activity_count = [];			//维护activity的数量
+		edge_count = [];				//维护edge的数量
+		for(i = 0; i < activityNum; i++){
+			activity_count[i] = 0;
+			edge_count.push([]);
+			for(j =0; j < activityNum; j++){
+				edge_count[i][j] = 0;
+			}
+		}
+
+		livingCase = [];				//维护需要显示的case数组
+		frameListIndex = 0;				//frameList的当前索引
+
+		updateInterval = setInterval(update,period);
+	});
+
+}
+
+function frameToTime(frame){
+	return parseInt((frame - animationJson.begin) / (animationJson.end - animationJson.begin) * timeMax);
+}
+function timeToFrame(time){
+	return parseInt(time / timeMax * (animationJson.end - animationJson.begin) + animationJson.begin);
+}
+
+function updateCase(){
+	var tmpFrameList = animationJson.frame_list[frameListIndex];	// 关键当前帧的所有内容
+	var tmpFrame = tmpFrameList.frame;				// 关键当前帧下的帧数
+	//读取activity信息
+	for(i = 0; i < tmpFrameList.activity_case.length; i++){	
+		if(tmpFrameList.activity_case[i].begin == tmpFrame){
+			// 开始帧数等于当前帧，case加入
+			livingCase.push(tmpFrameList.activity_case[i]);
+			activity_count[tmpFrameList.activity_case[i].index]++;
+		}
+		else if(tmpFrameList.activity_case[i].begin == -1){
+			// 结束帧数等于当前帧，case删去
+			for(j = 0; j < livingCase.length; j++){
+				if(livingCase[j].case_id = tmpFrameList.activity_case[i].case_id){
+					livingCase.splice(j,1);	//删除第j个元素往后1个
+					break;
+				}
+			}
+			activity_count[tmpFrameList.activity_case[i].index]--;
+		}
+		else{
+			console.log("this activity frame " + tmpFrame + " is wrong!(not begin or end)");
+		}
+	}
+	//读取edge信息
+	for(i = 0; i < tmpFrameList.edge_case.length; i++){	
+		if(tmpFrameList.edge_case[i].begin == tmpFrame){
+			// 开始帧数等于当前帧，case加入
+			livingCase.push(tmpFrameList.edge_case[i]);
+			edge_count[tmpFrameList.edge_case[i].from][tmpFrameList.edge_case[i].to]++;
+		}
+		else if(tmpFrameList.edge_case[i].begin == -1){
+			// 结束帧数等于当前帧，case删去
+			for(j = 0; j < livingCase.length; j++){
+				if(livingCase[j].case_id = tmpFrameList.edge_case[i].case_id){
+					livingCase.splice(j,1);	//删除第j个元素往后1个
+					break;
+				}
+			}
+			edge_count[tmpFrameList.edge_case[i].from][tmpFrameList.edge_case[i].to]--;
+		}
+		else{
+			console.log("this edge frame " + tmpFrame + " is wrong!(not begin or end)");
+		}
+	}
 }
 
 $(document).ready(init);
+
+function update(){
+	if(time > timeMax-100){
+		//time = 0;
+	    clearInterval(updateInterval);
+	}
+	frame = timeToFrame(time);
+	while(frame >= animationJson.frame_list[frameListIndex].frame){
+		updateCase();
+		frameListIndex++;
+	}
+	//repaint();
+	time += period;
+
+}
