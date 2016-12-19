@@ -430,6 +430,7 @@ function setThreshold()
 {
 	threshold = (activityNum * activityNum - 1) * $("#threshold")[0].value / 100;
 	threshold = edgeWeights[edgeType][parseInt(threshold, 10)];
+	$("#threshold-value").text($("#threshold")[0].value + "%");
 }
 
 function init()
