@@ -232,32 +232,60 @@ function calcPathLayout()
 					var sin = dy / Math.sqrt(dx * dx + dy * dy);
 					var cos = dx / Math.sqrt(dx * dx + dy * dy);
 					var t = Math.sqrt(2) / 2;
+					var start = {"x": layout[edgeType][i].x, "y": layout[edgeType][i].y};
+					var end = {"x": layout[edgeType][j].x, "y": layout[edgeType][j].y};
 					if (sin >= t)
 					{
-						pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y + rectHeight});
-						pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": (layout[edgeType][i].y + layout[edgeType][j].y + rectHeight) / 2});
-						pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y});
+						start.x += rectWidth / 2;
+						start.y += rectHeight;
+						end.x += rectWidth / 2;
 					}
 					else
 						if (sin <= -t)
 						{
-							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": layout[edgeType][i].y});
-							pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth / 2, "y": (layout[edgeType][i].y + layout[edgeType][j].y + rectHeight) / 2});
-							pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth / 2, "y": layout[edgeType][j].y + rectHeight});
+							start.x += rectWidth / 2;
+							end.x += rectWidth / 2;
+							end.y += rectHeight;
 						}
 						else
 							if (cos >= t)
 							{
-								pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x + rectWidth, "y": layout[edgeType][i].y + rectHeight / 2});
-								pathLayout[edgeType][i][j].push({"x": (layout[edgeType][i].x + layout[edgeType][j].x + rectWidth) / 2, "y": layout[edgeType][j].y + rectHeight / 2});
-								pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x, "y": layout[edgeType][j].y + rectHeight / 2});
+								start.x += rectWidth;
+								start.y += rectHeight / 2;
+								end.y += rectHeight / 2;
 							}
 							else
 							{
-								pathLayout[edgeType][i][j].push({"x": layout[edgeType][i].x, "y": layout[edgeType][i].y + rectHeight / 2});
-								pathLayout[edgeType][i][j].push({"x": (layout[edgeType][i].x + layout[edgeType][j].x + rectWidth) / 2, "y": layout[edgeType][j].y + rectHeight / 2});
-								pathLayout[edgeType][i][j].push({"x": layout[edgeType][j].x + rectWidth, "y": layout[edgeType][j].y + rectHeight / 2});
+								start.y += rectHeight / 2;
+								end.x += rectWidth;
+								end.y += rectHeight / 2;
 							}
+					pathLayout[edgeType][i][j].push(start);
+					var controlNum = 3;//must be odd
+					dx = (end.x - start.x) / (controlNum + 1);
+					dy = (end.y - start.y) / (controlNum + 1);
+					for (var k = 1; k <= controlNum; k++)
+					{
+						var tx = start.x + dx * k;
+						var ty = start.y + dy * k;
+						var dtx = 0;
+						var dty = 0;
+						for (var p = 0; p < activityNum; p++)
+						{
+							var ddtx = tx - (layout[edgeType][p].x + rectWidth / 2);
+							var ddty = ty - (layout[edgeType][i].y + rectHeight / 2);
+							var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
+							ddtx /= (dis * dis * dis * dis);
+							ddty /= (dis * dis * dis * dis);
+							dtx += ddtx;
+							dty += ddty;
+						}
+						console.log(5000 * dtx + " " + 5000 * dty);
+						tx += 5000000 * dtx;
+						ty += 5000000 * dty;
+						pathLayout[edgeType][i][j].push({"x": tx, "y": ty});
+					}
+					pathLayout[edgeType][i][j].push(end);
 				}
 		}
 	}
@@ -306,10 +334,15 @@ function paint()
 		.attr("font-weight", "bold")
 		.text(function(d, i) { return i; });
 		//.text(function(d, i) { return graph["activity_name"][i]; });
-	var lineFunction = d3.svg.line()
-		.x(function(d) { return d.x; })
-		.y(function(d) { return d.y; })
-		.interpolate("basis");
+	var lineFunction = function(d) {
+		var s = "";
+		for (var i = 0; i < d.length; i += 2)
+			if (i == 0)
+				s += "M " + d[i].x + " " + d[i].y;
+			else
+				s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
+		return s;
+	};
 	edgePaths = [];
 	for (var i = 0; i < activityNum; i++)
 	{
@@ -337,10 +370,15 @@ function repaint()
 		.attr("height", rectHeight);
 	activityTexts
 		.attr("y", rectHeight / 2);
-	var lineFunction = d3.svg.line()
-		.x(function(d) { return d.x; })
-		.y(function(d) { return d.y; })
-		.interpolate("basis");
+	var lineFunction = function(d) {
+		var s = "";
+		for (var i = 0; i < d.length; i += 2)
+			if (i == 0)
+				s += "M " + d[i].x + " " + d[i].y;
+			else
+				s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
+		return s;
+	};
 	for (var i = 0; i < activityNum; i++)
 		for (var j = 0; j < activityNum; j++)
 			edgePaths[i][j]
