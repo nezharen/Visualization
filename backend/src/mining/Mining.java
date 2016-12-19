@@ -531,7 +531,7 @@ public class Mining {
     
     public void writeAnimation() throws JSONException {
     	try {
-			FileWriter fw = new FileWriter("animaiton.json");
+			FileWriter fw = new FileWriter("animation.json");
 	
 			JSONObject json = new JSONObject();
 			
@@ -636,7 +636,7 @@ public class Mining {
 				frame.put("edge_case", edgeCaseList);
 				
 				dragFrameList.put(frame);
-				if(i == animationCollection.size - 1)
+				if(i == 100)
 					fw.write(frame.toString() + "\n");
 				else
 					fw.write(frame.toString() + ",\n");
@@ -729,7 +729,7 @@ public class Mining {
 			}
 			json.put("frame_list", frameList);
 			
-			fw.write("\t]\n]");
+			fw.write("\t]\n}");
 			fw.close();
 	//		save("animaiton.json", json.toString());
     	} catch (Exception ex) {

@@ -105,7 +105,7 @@
 {"activity_case":[{"case_id":"Case 3654","index":5,"end":1272514260000,"begin":1272253080000}],"edge_case":[{"case_id":"Case 444","end":1272522720000,"from":2,"to":2,"begin":1272260880000},{"case_id":"Case 1571","end":1272526800000,"from":2,"to":2,"begin":1272268200000},{"case_id":"Case 3300","end":1272528000000,"from":2,"to":2,"begin":1267846740000},{"case_id":"Case 3753","end":1272532140000,"from":2,"to":2,"begin":1269053160000},{"case_id":"Case 266","end":1272521160000,"from":2,"to":3,"begin":1272267660000},{"case_id":"Case 477","end":1272597000000,"from":2,"to":3,"begin":1272154800000},{"case_id":"Case 3014","end":1272604980000,"from":2,"to":3,"begin":1272077220000},{"case_id":"Case 2615","end":1272520200000,"from":2,"to":4,"begin":1271569080000},{"case_id":"Case 3193","end":1272528240000,"from":2,"to":4,"begin":1272089460000},{"case_id":"Case 3320","end":1272524460000,"from":2,"to":4,"begin":1271473560000},{"case_id":"Case 2595","end":1272525600000,"from":4,"to":2,"begin":1267852020000},{"case_id":"Case 3478","end":1272512820000,"from":5,"to":2,"begin":1269758100000},{"case_id":"Case 3772","end":1272511860000,"from":5,"to":2,"begin":1269152820000},{"case_id":"Case 3278","end":1272524100000,"from":5,"to":4,"begin":1272164820000}],"frame":1272497281000},
 {"activity_case":[],"edge_case":[{"case_id":"Case 444","end":1272588600000,"from":2,"to":2,"begin":1272524700000},{"case_id":"Case 477","end":1272597000000,"from":2,"to":3,"begin":1272154800000},{"case_id":"Case 3014","end":1272604980000,"from":2,"to":3,"begin":1272077220000},{"case_id":"Case 266","end":1272608640000,"from":2,"to":4,"begin":1272526560000},{"case_id":"Case 3193","end":1272600240000,"from":2,"to":4,"begin":1272528360000}],"frame":1272532381000},
 {"activity_case":[],"edge_case":[{"case_id":"Case 266","end":1272609361000,"from":2,"to":1,"begin":1272609360000}],"frame":1272609360000},
-{"activity_case":[],"edge_case":[],"frame":1272609361000},
+{"activity_case":[],"edge_case":[],"frame":1272609361000}
 	],
 	"frame_list":[
 {"activity_case":[],"edge_case":[{"case_id":"Case 2234","end":1267376700000,"from":0,"to":5,"begin":1267376699000}],"frame":1267376699000},
@@ -16473,4 +16473,4 @@
 {"activity_case":[],"edge_case":[{"case_id":"Case 266","end":1272609361000,"from":2,"to":1,"begin":1272609360000}],"frame":1272609360000},
 {"activity_case":[],"edge_case":[{"case_id":"Case 266","end":-1,"from":2,"to":1,"begin":-1}],"frame":1272609361000}
 	]
-]
+}
