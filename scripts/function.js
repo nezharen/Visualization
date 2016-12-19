@@ -1,7 +1,5 @@
-function sugiyama(lazy)
+function sugiyama()
 {
-	if (lazy && (subGraph[edgeType] != undefined))
-		return;
 	subGraph[edgeType] = [];
 	var tgraph = [];
 	for (var i = 0; i < activityNum; i++)
@@ -108,10 +106,8 @@ function sugiyama(lazy)
 	}
 }
 
-function topoSort(lazy)
+function topoSort()
 {
-	if (lazy && (topoLayout[edgeType] != undefined))
-		return;
 	topoLayout[edgeType] = [];
 	orderNum = [];
 	levelNum = 0;
@@ -165,16 +161,14 @@ function topoSort(lazy)
 	levelNum++;
 }
 
-function calcTopoLayout(lazy)
+function calcTopoLayout()
 {
-	sugiyama(lazy)
-	topoSort(lazy);
+	sugiyama()
+	topoSort();
 }
 
-function calcLayout(lazy)
+function calcLayout()
 {
-	if (lazy && (layout[edgeType] != undefined) && (pathLayout[edgeType] != undefined))
-		return;
 	var goldenRation = 1.618;
 	rectWidth = svgWidth / (2 * maxOrder + 1);
 	rectHeight = svgHeight / (2 * levelNum + 1);
@@ -409,7 +403,7 @@ function resize()
 
 function setEdgeType()
 {
-	edgeType = "case_frequency_edge";
+	edgeType = $("#edgetype")[0].value + "_edge";
 	if (edgeWeights[edgeType] != undefined)
 		return;
 	edgeWeights[edgeType] = [];
@@ -461,7 +455,7 @@ function init()
 			svgHeight = $("#svg").height();
 			setEdgeType();
 			setThreshold();
-			calcTopoLayout(true);
+			calcTopoLayout();
 			calcLayout();
 			paint();
 			$(window).resize(function() {
@@ -469,9 +463,16 @@ function init()
 				calcPathLayout();
 				repaint();
 			});
+			$("#edgetype").change(function() {
+				setEdgeType();
+				setThreshold();
+				calcTopoLayout();
+				calcLayout();
+				repaint();
+			});
 			$("#threshold").change(function() {
 				setThreshold();
-				calcTopoLayout(false);
+				calcTopoLayout();
 				calcLayout();
 				repaint();
 			});
