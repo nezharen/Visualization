@@ -563,14 +563,18 @@ function updateCase(){
 $(document).ready(init);
 
 function update(){
-	if(time > timeMax-100){
+	if(time >= timeMax){
 		//time = 0;
 	    clearInterval(updateInterval);
 	}
 	frame = timeToFrame(time);
 	while(frame >= animationJson.frame_list[frameListIndex].frame){
+
 		updateCase();
-		frameListIndex++;
+		if(frameListIndex < animationJson.frame_list.length - 1)
+			frameListIndex++;
+		else
+			break;
 	}
 	//repaint();
 	time += period;
