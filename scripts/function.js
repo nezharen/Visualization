@@ -277,8 +277,6 @@ function calcPathLayout()
 								var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
 								ddtx *= 100000 / (dis * dis * dis);
 								ddty *= 100000 /(dis * dis * dis);
-								if (i == 0 && j == 6 && p == 7)
-									console.log(k + " " + ddtx + " " + ddty);
 								if (Math.abs(ddtx) > Math.min(minSpaceWidth, svgWidth / 10))
 									ddtx = ddtx / Math.abs(ddtx) * Math.min(minSpaceWidth, svgWidth / 10);
 								if (Math.abs(ddty) > Math.min(minSpaceWidth, svgHeight / 10))
@@ -441,7 +439,7 @@ function setThreshold()
 function init()
 {
 	d3.json("data/graphNet.json", function (error, data) {
-			var zoom = d3.behavior.zoom()
+			zoom = d3.behavior.zoom()
 				.scaleExtent([0.5, 2])
 				.on("zoom", function() {
 					svgContainer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
@@ -492,6 +490,11 @@ function init()
 				calcTopoLayout();
 				calcLayout();
 				repaint();
+			});
+			$("#resize").click(function() {
+				svgContainer.attr("transform", "");
+				zoom.translate([0, 0]);
+				zoom.scale(1);
 			});
 	});
 
