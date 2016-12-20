@@ -438,6 +438,7 @@ function setThreshold()
 
 function init()
 {
+	$("#loading").modal("toggle");
 	d3.json("data/graphNet.json", function (error, data) {
 			zoom = d3.behavior.zoom()
 				.scaleExtent([0.5, 2])
@@ -496,6 +497,7 @@ function init()
 				zoom.translate([0, 0]);
 				zoom.scale(1);
 			});
+			$("#loading").modal("toggle");
 	});
 
 
