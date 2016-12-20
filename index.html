@@ -10,32 +10,54 @@
     <div class="container-fluid">
       <div id="main" class="row" style="padding:10px; text-align:center">
         <div class="col-xs-9" style="height:100%">
-          <svg id="svg" style="width:100%; height:100%"></svg>
-	</div>
-	<div class="col-xs-3" style="height:100%">
-	  <div class="form-group">
-	    <div class="col-lg-4">
-	      <label for="edgetype" style="height:34px; padding:6px 0px; margin-bottom:0">边类型：</label>
+          <svg id="svg" style="width:100%; height:90%"></svg>
+	  <div style="width:100%; height:10%">
+	    <div class="row">
+	      <div class="col-xs-2">
+	        <button type="button" class="btn btn-default" aria-label="Backward">
+	          <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
+	        </button>
+	        <button type="button" class="btn btn-default" aria-label="Play">
+	          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
+	        </button>
+	        <button type="button" class="btn btn-default" aria-label="Forward">
+	          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
+	        </button>
+	      </div>
+	      <div class="col-xs-10">
+	        <input id="position" class="form-control" type="range" min="0" max="100" value="50" />
+	      </div>
 	    </div>
-	    <div class="col-lg-8">
-	      <select id="edgetype" class="form-control">
-	        <option>case_frequency</option>
-	        <option>event_frequency</option>
-	        <option>total_duration</option>
-	        <option>min_duration</option>
-	        <option>max_duration</option>
-	      </select>
+	  </div>
+	</div>
+	<div class="col-xs-3" style="height:100%; text-align:center">
+	  <div class="form-group">
+	    <div class="row">
+	      <div class="col-lg-4">
+	        <label for="edgetype" style="height:34px; padding:6px 0px; margin-bottom:0">边类型：</label>
+	      </div>
+	      <div class="col-lg-8">
+	        <select id="edgetype" class="form-control">
+	          <option>case_frequency</option>
+	          <option>event_frequency</option>
+	          <option>total_duration</option>
+	          <option>min_duration</option>
+	          <option>max_duration</option>
+	        </select>
+	      </div>
 	    </div>
 	  </div>
 	  <div class="form-group">
-	    <div class="col-lg-4">
-	      <label for="threshold" style="height:34px; padding:6px 0px; margin-bottom:0">边比例：</label>
-	    </div>
-	    <div class="col-lg-6">
-	      <input id="threshold" class="form-control" type="range" min="0" max="100" value="50" />
-	    </div>
-	    <div class="col-lg-2">
-	      <label id="threshold-value" style="height:34px; padding:6px 0px; margin-bottom: 0"></label>
+	    <div class="row">
+	      <div class="col-lg-4">
+	        <label for="threshold" style="height:34px; padding:6px 0px; margin-bottom:0">边比例：</label>
+	      </div>
+	      <div class="col-lg-6">
+	        <input id="threshold" class="form-control" type="range" min="0" max="100" value="50" />
+	      </div>
+	      <div class="col-lg-2">
+	        <label id="threshold-value" style="height:34px; padding:6px 0px; margin-bottom: 0"></label>
+	      </div>
 	    </div>
 	  </div>
 	</div>

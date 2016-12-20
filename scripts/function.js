@@ -256,6 +256,7 @@ function calcPathLayout()
 					var controlNum = 3;//must be odd
 					dx = (end.x - start.x) / (controlNum + 1);
 					dy = (end.y - start.y) / (controlNum + 1);
+					t = Math.sqrt(3) / 2;
 					for (var k = 1; k <= controlNum; k++)
 					{
 						var tx = start.x + dx * k;
@@ -276,10 +277,12 @@ function calcPathLayout()
 								var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
 								ddtx *= 100000 / (dis * dis * dis);
 								ddty *= 100000 /(dis * dis * dis);
+								if (i == 0 && j == 6 && p == 7)
+									console.log(k + " " + ddtx + " " + ddty);
 								if (Math.abs(ddtx) > Math.min(minSpaceWidth, svgWidth / 10))
 									ddtx = ddtx / Math.abs(ddtx) * Math.min(minSpaceWidth, svgWidth / 10);
-								if (Math.abs(ddty) > Math.min(minSpaceWidth, svgWidth / 10))
-									ddty = ddty / Math.abs(ddty) * Math.min(minSpaceWidth, svgWidth / 10);
+								if (Math.abs(ddty) > Math.min(minSpaceWidth, svgHeight / 10))
+									ddty = ddty / Math.abs(ddty) * Math.min(minSpaceWidth, svgHeight / 10);
 								dtx += ddtx;
 								dty += ddty;
 							}
@@ -439,9 +442,9 @@ function init()
 {
 	d3.json("data/graphNet.json", function (error, data) {
 			var zoom = d3.behavior.zoom()
+				.scaleExtent([0.5, 2])
 				.on("zoom", function() {
 					svgContainer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-					console.log(d3.event.scale);
 				});
 			d3.select("#svg").call(zoom);
 			svgContainer = d3.select("#svg").append("g");
