@@ -295,26 +295,34 @@ function calcPathLayout()
 
 function paint()
 {
-	var drag = d3.behavior.drag().on("drag", function(d, i) {
-		var t = Math.min(rectWidth / 2, minSpaceWidth / 2);
-		var tx = layout[edgeType][i].x + d3.event.dx;
-		var ty = layout[edgeType][i].y + d3.event.dy;
-		if (graph[edgeType][i][i] > threshold)
-		{
-			if ((tx - t) < 0 || (ty - t) < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
-				return;
-		}
-		else
-		{
-			if (tx < 0 || ty < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
-				return;
-		}
-		layout[edgeType][i].x = tx;
-		layout[edgeType][i].y = ty;;
-		calcPathLayout();
-		repaint();
-	});
-	activityContainers = svg.selectAll("g")
+	var drag = d3.behavior.drag()
+			.on("dragstart", function() {
+				d3.event.sourceEvent.stopPropagation();
+				d3.select(this).classed("dragging", true);
+			})
+			.on("drag", function(d, i) {
+				var t = Math.min(rectWidth / 2, minSpaceWidth / 2);
+				var tx = layout[edgeType][i].x + d3.event.dx;
+				var ty = layout[edgeType][i].y + d3.event.dy;
+				if (graph[edgeType][i][i] > threshold)
+				{
+					if ((tx - t) < 0 || (ty - t) < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
+						return;
+				}
+				else
+				{
+					if (tx < 0 || ty < 0 || (tx + rectWidth > svgWidth) || (ty + rectHeight > svgHeight))
+						return;
+				}
+				layout[edgeType][i].x = tx;
+				layout[edgeType][i].y = ty;;
+				calcPathLayout();
+				repaint();
+			})
+			.on("dragend", function() {
+				d3.select(this).classed("dragging", false);
+			});
+	activityContainers = svgContainer.selectAll("g")
 		.data(layout[edgeType])
 		.enter()
 		.append("g")
@@ -350,7 +358,7 @@ function paint()
 		for (var j = 0; j < activityNum; j++)
 		{
 			edgePaths[i].push([]);
-			edgePaths[i][j] = svg.append("path")
+			edgePaths[i][j] = svgContainer.append("path")
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
 				.attr("stroke", "black")
 				.attr("stroke-width", 2)
@@ -430,8 +438,14 @@ function setThreshold()
 function init()
 {
 	d3.json("data/graphNet.json", function (error, data) {
-			svg = d3.select("#svg");
-			svg.append("defs").append("marker")
+			var zoom = d3.behavior.zoom()
+				.on("zoom", function() {
+					svgContainer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+					console.log(d3.event.scale);
+				});
+			d3.select("#svg").call(zoom);
+			svgContainer = d3.select("#svg").append("g");
+			svgContainer.append("defs").append("marker")
 				.attr("id","arrow")
 				.attr("markerUnits","strokeWidth")
 				.attr("markerWidth","12")
