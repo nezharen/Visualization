@@ -421,7 +421,7 @@ function setEdgeType()
 			edgeWeights[edgeType].push(graph[edgeType][i][j]);
 	for (var i = 1; i < activityNum * activityNum; i++)
 		for (var j = 0; j < activityNum * activityNum - i; j++)
-			if (edgeWeights[edgeType][j] > edgeWeights[edgeType][j + 1])
+			if (edgeWeights[edgeType][j] < edgeWeights[edgeType][j + 1])
 			{
 				var t = edgeWeights[edgeType][j];
 				edgeWeights[edgeType][j] = edgeWeights[edgeType][j + 1];
