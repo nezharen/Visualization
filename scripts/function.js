@@ -395,7 +395,6 @@ function repaint()
 			edgePaths[i][j]
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
 				.attr("stroke", edgeColorScale(edge_count[i][j]))
-
 				.attr("stroke-width", edgeWidthScale(edge_count[i][j]))
 }
 
@@ -511,7 +510,7 @@ function init()
 		animationJson = data;
 
 		time = 0;		//当前时刻
-		timeMax = 3000;	//动画总时长
+		timeMax = 10000;	//动画总时长
 		period = 50;	//刷新率
 
 		frame = animationJson.begin;	//当前帧数
@@ -530,14 +529,14 @@ function init()
 		frameListIndex = 0;				//frameList的当前索引
 
 		activityColorScale = d3.scale.linear()
-	        .domain([0, 100])
+	        .domain([0, 50])
 	        .range(["#add8e6", "blue"]);
 	    edgeColorScale = d3.scale.linear()
-	        .domain([0, 100])
+	        .domain([0, 50])
 	        .range(["#f2cbbc", "red"]);
 	    edgeWidthScale = d3.scale.linear()
-	        .domain([0, 100])
-	        .range([1, 3]);
+	        .domain([0, 50])
+	        .range([1, 2]);
 
 		updateInterval = setInterval(update,period);
 	});
@@ -568,6 +567,7 @@ function updateCase(){
 	if(tmpFrame == 1267490820000)
 		tmpFrame = 1267490820000;
 
+	var toBeDeletedCase = [];
 	//读取activity信息
 	for(var i = 0; i < tmpFrameList.activity_case.length; i++){	
 	// tmpFrameList.activity_case[i].begin != tmpFrameList.activity_case[i].end 
@@ -576,7 +576,7 @@ function updateCase(){
 			for(var j = 0; j < livingCase.length; j++){
 				if(livingCase[j].case_id == tmpFrameList.activity_case[i].case_id){
 					if(livingCase[j].from == undefined){
-						console.log("livingCase[j].from == undefined  caseid = " + livingCase[j].case_id);
+						toBeDeletedCase.push(livingCase[j].case_id);
 						break;
 					}
 					edge_count[livingCase[j].from][livingCase[j].to]--;
@@ -588,9 +588,6 @@ function updateCase(){
 			livingCase.push(tmpFrameList.activity_case[i]);
 			activity_count[tmpFrameList.activity_case[i].index]++;
 		}
-		else{
-			//console.log("this activity frame " + tmpFrame + " is wrong!(not begin or end)");
-		}
 	}
 	//读取edge信息(开始结束的frame必定在edge中)
 	for(var i = 0; i < tmpFrameList.edge_case.length; i++){
@@ -598,7 +595,6 @@ function updateCase(){
 		if(tmpFrameList.edge_case[i].begin == -1){	// 整个case结束
 			for(j = 0; j < livingCase.length; j++){
 				if(livingCase[j].case_id == tmpFrameList.edge_case[i].case_id){
-
 					edge_count[tmpFrameList.edge_case[i].from][tmpFrameList.edge_case[i].to]--;
 					livingCase.splice(j,1);	//删除第j个元素往后1个
 					break;
@@ -611,7 +607,7 @@ function updateCase(){
 			for(var j = 0; j < livingCase.length; j++){
 				if(livingCase[j].case_id == tmpFrameList.edge_case[i].case_id){
 					if(livingCase[j].index == undefined){
-						console.log("livingCase[j].index == undefined  caseid = " + livingCase[j].case_id);
+						toBeDeletedCase.push(livingCase[j].case_id);
 						break;
 					}
 					activity_count[livingCase[j].index]--;
@@ -623,8 +619,19 @@ function updateCase(){
 			livingCase.push(tmpFrameList.edge_case[i]);
 			edge_count[tmpFrameList.edge_case[i].from][tmpFrameList.edge_case[i].to]++;
 		}
-		else{
-			//console.log("this edge frame " + tmpFrame + " is wrong!(not begin or end)");
+	}
+	// 最后删掉未删除的
+	for(var i = 0; i < toBeDeletedCase.length; i++){
+		for(var j = livingCase.length - 1; j > 0; j--){
+			if(livingCase[j].case_id == toBeDeletedCase[i]){
+				if(livingCase[j].index != undefined){
+					activity_count[livingCase[j].index]--;
+				}
+				else if(livingCase[j].from != undefined){
+					edge_count[livingCase[j].from][livingCase[j].to]--;
+				}
+				livingCase.splice(j,1);
+			}
 		}
 	}
 }
@@ -646,7 +653,6 @@ function update(){
 			break;
 	}
 	repaint();
-	console.log(activity_count)
 	$("#position")[0].value = time / timeMax * 100;
 
 	time += period;
