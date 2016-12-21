@@ -456,7 +456,7 @@ function resize()
 
 function setEdgeType()
 {
-	edgeType = $("#edgetype")[0].value + "_edge";
+	edgeType = $("#edgetype").val() + "_edge";
 	if (edgeWeights[edgeType] != undefined)
 		return;
 	edgeWeights[edgeType] = [];
@@ -475,9 +475,9 @@ function setEdgeType()
 
 function setThreshold()
 {
-	threshold = (activityNum * activityNum - 1) * $("#threshold")[0].value / 100;
+	threshold = (activityNum * activityNum - 1) * $("#threshold").val() / 100;
 	threshold = edgeWeights[edgeType][parseInt(threshold, 10)];
-	$("#threshold-value").text($("#threshold")[0].value + "%");
+	$("#threshold-value").text($("#threshold").val() + "%");
 }
 
 function setChart()
@@ -498,7 +498,7 @@ function setChart()
 		},
 		yAxis: {
 			title: {
-				text: $("#edgetype")[0].value
+				text: $("#edgetype").val()
 			}
 		},
 		series: [{
@@ -508,7 +508,7 @@ function setChart()
 	for (var i = 0; i < activityNum; i++)
 	{
 		options["xAxis"]["categories"].push(i);
-		options["series"][0]["data"].push(graph[$("#edgetype")[0].value][i]);
+		options["series"][0]["data"].push(graph[$("#edgetype").val()][i]);
 	}
 	chart = Highcharts.chart(options);
 }
