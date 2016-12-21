@@ -376,7 +376,7 @@ function repaint()
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 	activityRects
 		.data(activity_count)
-		.attr("fill", function(d){ return colorScale(d);})
+		.attr("fill", function(d){ return activityColorScale(d);})
 		.attr("width", rectWidth)
 		.attr("height", rectHeight);
 	activityTexts
@@ -394,6 +394,9 @@ function repaint()
 		for (var j = 0; j < activityNum; j++)
 			edgePaths[i][j]
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
+				.attr("stroke", edgeColorScale(edge_count[i][j]))
+
+				.attr("stroke-width", edgeWidthScale(edge_count[i][j]))
 }
 
 function resize()
@@ -529,6 +532,12 @@ function init()
 		activityColorScale = d3.scale.linear()
 	        .domain([0, 100])
 	        .range(["#add8e6", "blue"]);
+	    edgeColorScale = d3.scale.linear()
+	        .domain([0, 100])
+	        .range(["#f2cbbc", "red"]);
+	    edgeWidthScale = d3.scale.linear()
+	        .domain([0, 100])
+	        .range([1, 3]);
 
 		updateInterval = setInterval(update,period);
 	});
