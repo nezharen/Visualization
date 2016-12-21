@@ -540,7 +540,6 @@ function init()
 
 		updateInterval = setInterval(update,period);
 	});
-
 }
 
 function frameToTime(frame){
@@ -558,9 +557,10 @@ function testRepeatTime(){
 	   	for(var j = 0; j < animationJson.frame_list[i].edge_case.length; j++){
 	       	if(animationJson.frame_list[i].edge_case[j].begin == animationJson.frame_list[i].edge_case[j].end)
 	            console.log("edge + " + animationJson.frame_list[i].edge_case[j].case_id + "  +  " + animationJson.frame_list[i].frame);}
-	    }
+	}
 }
 
+// 维护livingCase数组
 function updateCase(){
 	var tmpFrameList = animationJson.frame_list[frameListIndex];	// 关键当前帧的所有内容
 	var tmpFrame = tmpFrameList.frame;				// 关键当前帧下的帧数
@@ -620,7 +620,7 @@ function updateCase(){
 			edge_count[tmpFrameList.edge_case[i].from][tmpFrameList.edge_case[i].to]++;
 		}
 	}
-	// 最后删掉未删除的
+	// 最后删掉因为时间冲突之前未删除的
 	for(var i = 0; i < toBeDeletedCase.length; i++){
 		for(var j = livingCase.length - 1; j > 0; j--){
 			if(livingCase[j].case_id == toBeDeletedCase[i]){
@@ -658,3 +658,36 @@ function update(){
 	time += period;
 
 }
+
+
+
+function setPosition()
+{
+	var dragFrameList = animationJson.drag_frame_list[$("#position")[0].value];
+	frame = dragFrameList.frame;
+	time = frameToTime(frame);
+
+	livingCase = [];
+	activity_count = [];			//维护activity的数量
+	edge_count = [];				//维护edge的数量
+	for(var i = 0; i < activityNum; i++){
+		activity_count[i] = 0;
+		edge_count.push([]);
+		for(var j =0; j < activityNum; j++){
+			edge_count[i][j] = 0;
+		}
+	}
+
+	for(var i = 0; i < dragFrameList.activity_case.length; i++){
+		livingCase.push(dragFrameList.activity_case[i]);
+		activity_count[dragFrameList.activity_case[i].index]++
+	}
+	for(var i = 0; i < dragFrameList.edge_case.length; i++){
+		livingCase.push(dragFrameList.edge_case[i]);
+		edge_count[dragFrameList.edge_case[i].from][dragFrameList.edge_case[i].to]++
+	}
+}
+$("#position").change(function() {
+	setPosition();
+	repaint();
+});
