@@ -435,6 +435,7 @@ function repaint()
 function resize()
 {
 	$("#main").height($(window).height() - 20);
+	$("#aside").height($(window).height() - 20);
 	var originSvgWidth = svgWidth;
 	var originSvgHeight = svgHeight;
 	svgWidth = $("#svg").width();
@@ -446,6 +447,7 @@ function resize()
 		layout[edgeType][i].x *= (svgWidth / originSvgWidth);
 		layout[edgeType][i].y *= (svgHeight / originSvgHeight);
 	}
+	fixChartHeight();
 }
 
 function setEdgeType()
@@ -472,6 +474,45 @@ function setThreshold()
 	threshold = (activityNum * activityNum - 1) * $("#threshold")[0].value / 100;
 	threshold = edgeWeights[edgeType][parseInt(threshold, 10)];
 	$("#threshold-value").text($("#threshold")[0].value + "%");
+}
+
+function setChart()
+{
+	var options = {
+		chart: {
+			renderTo: "chart",
+			type: "bar"
+		},
+		title: {
+			text: null
+		},
+		legend: {
+			enabled: false
+		},
+		xAxis: {
+			categories: []
+		},
+		yAxis: {
+			title: {
+				text: $("#edgetype")[0].value
+			}
+		},
+		series: [{
+			data: []
+		}]
+	};
+	for (var i = 0; i < activityNum; i++)
+	{
+		options["xAxis"]["categories"].push(i);
+		options["series"][0]["data"].push(graph[$("#edgetype")[0].value][i]);
+	}
+	chart = Highcharts.chart(options);
+}
+
+function fixChartHeight()
+{
+	var t = $("#edgetype-form").height() + $("#threshold-form").height() + $("#chart").height() + $("#table").height() + 50;
+	$("#chart").height($("#chart").height() - (t - $("#aside").height()));
 }
 
 function init()
@@ -505,6 +546,7 @@ function init()
 			layout = {};
 			pathLayout = {};
 			$("#main").height($(window).height() - 20);
+			$("#aside").height($(window).height() - 20);
 			svgWidth = $("#svg").width();
 			svgHeight = $("#svg").height();
 			setEdgeType();
@@ -512,9 +554,11 @@ function init()
 			calcTopoLayout();
 			calcLayout();
 			paint();
+			setChart();
 			activitySelected = 0;
 			pathSelected = {"x": -1, "y": -1};
 			showProperty();
+			fixChartHeight();
 			$(window).resize(function() {
 				resize();
 				calcPathLayout();

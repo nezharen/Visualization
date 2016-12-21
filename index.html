@@ -35,8 +35,8 @@
 	    </div>
 	  </div>
 	</div>
-	<div class="col-xs-3" style="height:100%; text-align:center">
-	  <div class="form-group">
+	<div id="aside" class="col-xs-3" style="height:100%; text-align:center">
+	  <div id="edgetype-form" class="form-group">
 	    <div class="row">
 	      <div class="col-lg-4">
 	        <label for="edgetype" style="height:34px; padding:6px 0px; margin-bottom:0">边类型：</label>
@@ -52,7 +52,7 @@
 	      </div>
 	    </div>
 	  </div>
-	  <div class="form-group">
+	  <div id="threshold-form" class="form-group">
 	    <div class="row">
 	      <div class="col-lg-4">
 	        <label for="threshold" style="height:34px; padding:6px 0px; margin-bottom:0">边比例：</label>
@@ -65,20 +65,24 @@
 	      </div>
 	    </div>
 	  </div>
-	  <table class="table table-bordered">
-	    <tr>
-	      <th style="text-align:center">属性名</th>
-	      <th style="text-align:center">属性值</th>
-	    <tr>
-	    <tr>
-	      <td><label id="property-name-1" for="property-value-1" style="height:34px; padding:6px 0px; margin-bottom:0"></label></td>
-	      <td><input id="property-value-1" class="form-control" type="text" style="text-align:center" disabled="true" /></td>
-	    <tr>
-	    <tr>
-	      <td><label id="property-name-2" for="property-value-2" style="height:34px; padding:6px 0px; margin-bottom:0"></label></td>
-	      <td><input id="property-value-2" class="form-control" type="text" style="text-align:center" /></td>
-	    <tr>
-	  </table>
+	  <div id="chart">
+	  </div>
+	  <div id="table">
+	    <table class="table table-bordered">
+	      <tr>
+	        <th style="text-align:center">属性名</th>
+	        <th style="text-align:center">属性值</th>
+	      <tr>
+	      <tr>
+	        <td><label id="property-name-1" for="property-value-1" style="height:34px; padding:6px 0px; margin-bottom:0"></label></td>
+	        <td><input id="property-value-1" class="form-control" type="text" style="text-align:center" disabled="true" /></td>
+	      <tr>
+	      <tr>
+	        <td><label id="property-name-2" for="property-value-2" style="height:34px; padding:6px 0px; margin-bottom:0"></label></td>
+	        <td><input id="property-value-2" class="form-control" type="text" style="text-align:center" /></td>
+	      <tr>
+	    </table>
+	  </div>
 	</div>
       </div>
     </div>
@@ -100,6 +104,7 @@
     <script src="scripts/jquery-3.1.1.min.js"></script>
     <script src="scripts/bootstrap.min.js"></script>
     <script src="scripts/d3.min.js"></script>
+    <script src="scripts/highcharts.js"></script>
     <script src="scripts/function.js"></script>
   </body>
 </html>
