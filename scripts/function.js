@@ -187,8 +187,6 @@ function calcLayout()
 		var dx = spaceWidth * (1 - 1 / goldenRation) / 2 + Math.random() / 2 * spaceWidth;
 		if (spaceWidth < minSpaceWidth)
 			minSpaceWidth = spaceWidth;
-		//if (rectWidth * goldenRation / 2 < dx)
-			//dx = rectWidth * goldenRation / 2;
 		if ((topoLayout[edgeType][i]["level"] & 1) == 0)
 			x -= dx;
 		else
@@ -294,12 +292,43 @@ function calcPathLayout()
 	}
 }
 
+function resetProperty()
+{
+	if (activitySelected > -1)
+		return;
+	if (graph[edgeType][pathSelected.x][pathSelected.y] <= threshold)
+	{
+		activitySelected = 0;
+		pathSelected = {"x": -1, "y": -1};
+		showProperty();
+	}
+}
+
+function showProperty()
+{
+	if (activitySelected > -1)
+	{
+		$("#property-name-1").text("Activity Index");
+		$("#property-value-1").val(activitySelected);
+		$("#property-name-2").text("Activity Name");
+		$("#property-value-2").val(graph["activity_name"][activitySelected]);
+		return;
+	}
+	$("#property-name-1").text("Edge Index");
+	$("#property-value-1").val("[" + pathSelected.x + "," +  pathSelected.y + "]");
+	$("#property-name-2").text("Edge Weight");
+	$("#property-value-2").val(graph[edgeType][pathSelected.x][pathSelected.y]);
+}
+
 function paint()
 {
-	var drag = d3.behavior.drag()
-			.on("dragstart", function() {
+	var activityDrag = d3.behavior.drag()
+			.on("dragstart", function(d, i) {
 				d3.event.sourceEvent.stopPropagation();
 				d3.select(this).classed("dragging", true);
+				activitySelected = i;
+				pathSelected = {"x": -1, "y": -1};
+				showProperty();
 			})
 			.on("drag", function(d, i) {
 				var t = Math.min(rectWidth / 2, minSpaceWidth / 2);
@@ -323,12 +352,19 @@ function paint()
 			.on("dragend", function() {
 				d3.select(this).classed("dragging", false);
 			});
+	var pathDrag = d3.behavior.drag()
+			.on("dragstart", function(d) {
+				d3.event.sourceEvent.stopPropagation();
+				activitySelected = -1;
+				pathSelected = {"x": d.x, "y":d.y};
+				showProperty();
+			});
 	activityContainers = svgContainer.selectAll("g")
 		.data(layout[edgeType])
 		.enter()
 		.append("g")
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; })
-		.call(drag);
+		.call(activityDrag);
 	activityRects = activityContainers.append("rect")
 		.attr("width", rectWidth)
 		.attr("height", rectHeight)
@@ -360,11 +396,13 @@ function paint()
 		{
 			edgePaths[i].push([]);
 			edgePaths[i][j] = svgContainer.append("path")
+				.data([{"x": i, "y": j}])
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
 				.attr("stroke", "black")
 				.attr("stroke-width", 2)
 				.attr("fill", "none")
-				.attr("marker-end","url(#arrow)");
+				.attr("marker-end","url(#arrow)")
+				.call(pathDrag);
 		}
 	}
 }
@@ -440,8 +478,8 @@ function init()
 {
 	$("#loading").modal("toggle");
 	d3.json("data/graphNet.json", function (error, data) {
-			zoom = d3.behavior.zoom()
-				.scaleExtent([0.5, 2])
+			var zoom = d3.behavior.zoom()
+				.scaleExtent([0.1, 10])
 				.on("zoom", function() {
 					svgContainer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
 				});
@@ -474,6 +512,9 @@ function init()
 			calcTopoLayout();
 			calcLayout();
 			paint();
+			activitySelected = 0;
+			pathSelected = {"x": -1, "y": -1};
+			showProperty();
 			$(window).resize(function() {
 				resize();
 				calcPathLayout();
@@ -485,17 +526,36 @@ function init()
 				calcTopoLayout();
 				calcLayout();
 				repaint();
-			});
+				resetProperty();
+				});
 			$("#threshold").change(function() {
 				setThreshold();
 				calcTopoLayout();
 				calcLayout();
 				repaint();
+				resetProperty();
 			});
 			$("#resize").click(function() {
 				svgContainer.attr("transform", "");
 				zoom.translate([0, 0]);
 				zoom.scale(1);
+			});
+			$("#property-value-2").bind("keypress", function (e) {
+				if (e.keyCode == "13")
+				{
+					if (activitySelected > -1)
+					{
+						graph["activity_name"][activitySelected] = $("#property-value-2").val();
+					}
+					else
+					{
+						graph[edgeType][pathSelected.x][pathSelected.y] = parseInt($("#property-value-2").val(), 10);
+						calcTopoLayout();
+						calcLayout();
+						repaint();
+						resetProperty();
+					}
+				}
 			});
 			$("#loading").modal("toggle");
 	});

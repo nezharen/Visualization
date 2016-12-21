@@ -14,13 +14,13 @@
 	  <div style="width:100%; height:10%">
 	    <div class="row">
 	      <div class="col-xs-2">
-	        <button id="backward" type="button" class="btn btn-default" aria-label="Backward">
+	        <button id="backward" type="button" class="btn btn-default" aria-label="后退">
 	          <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
 	        </button>
-	        <button id="play" type="button" class="btn btn-default" aria-label="Play">
+	        <button id="play" type="button" class="btn btn-default" aria-label="播放">
 	          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 	        </button>
-	        <button id="forward" type="button" class="btn btn-default" aria-label="Forward">
+	        <button id="forward" type="button" class="btn btn-default" aria-label="前进">
 	          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
 	        </button>
 	      </div>
@@ -28,7 +28,7 @@
 	        <input id="position" class="form-control" type="range" min="0" max="100" value="50" />
 	      </div>
 	      <div class="col-xs-1">
-	        <button id="resize" type="button" class="btn btn-default" aria-label="Resize">
+	        <button id="resize" type="button" class="btn btn-default" aria-label="缩放还原">
 	          <span class="glyphicon glyphicon-resize-small" aria-hidden="true"></span>
 	        </button>
 	      </div>
@@ -58,13 +58,27 @@
 	        <label for="threshold" style="height:34px; padding:6px 0px; margin-bottom:0">边比例：</label>
 	      </div>
 	      <div class="col-lg-6">
-	        <input id="threshold" class="form-control" type="range" min="0" max="100" value="50" />
+	        <input id="threshold" class="form-control" type="range" min="0" max="100" value="20" />
 	      </div>
 	      <div class="col-lg-2">
 	        <label id="threshold-value" style="height:34px; padding:6px 0px; margin-bottom: 0"></label>
 	      </div>
 	    </div>
 	  </div>
+	  <table class="table table-bordered">
+	    <tr>
+	      <th style="text-align:center">属性名</th>
+	      <th style="text-align:center">属性值</th>
+	    <tr>
+	    <tr>
+	      <td><label id="property-name-1" for="property-value-1" style="height:34px; padding:6px 0px; margin-bottom:0"></label></td>
+	      <td><input id="property-value-1" class="form-control" type="text" style="text-align:center" disabled="true" /></td>
+	    <tr>
+	    <tr>
+	      <td><label id="property-name-2" for="property-value-2" style="height:34px; padding:6px 0px; margin-bottom:0"></label></td>
+	      <td><input id="property-value-2" class="form-control" type="text" style="text-align:center" /></td>
+	    <tr>
+	  </table>
 	</div>
       </div>
     </div>
