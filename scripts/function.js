@@ -510,7 +510,7 @@ function init()
 		animationJson = data;
 
 		time = 0;		//当前时刻
-		timeMax = 10000;	//动画总时长
+		timeMax = 5000;	//动画总时长
 		period = 50;	//刷新率
 
 		frame = animationJson.begin;	//当前帧数
@@ -538,7 +538,8 @@ function init()
 	        .domain([0, 50])
 	        .range([1, 2]);
 
-		updateInterval = setInterval(update,period);
+		$("#position").val(0);
+		//updateInterval = setInterval(update,period);
 	});
 }
 
@@ -639,9 +640,12 @@ function updateCase(){
 $(document).ready(init);
 
 function update(){
+	console.log("update");
 	if(time >= timeMax){
-		//time = 0;
+		$("#play span").attr("class", "glyphicon glyphicon-play");
+		time = 0;
 	    clearInterval(updateInterval);
+	    console.log("clear");
 	}
 	frame = timeToFrame(time);
 	while(frame >= animationJson.frame_list[frameListIndex].frame){
@@ -653,16 +657,13 @@ function update(){
 			break;
 	}
 	repaint();
-	$("#position")[0].value = time / timeMax * 100;
-
+	$("#position").val(time / timeMax * 100);
 	time += period;
-
 }
-
-
 
 function setPosition()
 {
+	console.log("setPosition");
 	var dragFrameList = animationJson.drag_frame_list[$("#position")[0].value];
 	frame = dragFrameList.frame;
 	time = frameToTime(frame);
@@ -687,7 +688,23 @@ function setPosition()
 		edge_count[dragFrameList.edge_case[i].from][dragFrameList.edge_case[i].to]++
 	}
 }
+
 $("#position").change(function() {
+
 	setPosition();
 	repaint();
+});
+
+
+$("#play").click(function() {
+	console.log("play");
+	if($("#play span").attr("class") == "glyphicon glyphicon-play"){
+		$("#play span").attr("class", "glyphicon glyphicon-pause");
+		setPosition();	//通过进度条判断，不存储time等变量
+		updateInterval = setInterval(update,period);
+	}
+	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){
+		$("#play span").attr("class", "glyphicon glyphicon-play");
+		clearInterval(updateInterval);
+	}
 });
