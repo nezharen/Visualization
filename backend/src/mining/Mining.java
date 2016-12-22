@@ -28,6 +28,7 @@ public class Mining {
 	static final String encodingText = "GBK";
 	static final String timestamp = "dd.MM.yy HH:mm";
 	long animationPrepareTime = 1000;
+	long animationSameTime = 30;
 	
 	static EventCollection eventCollection;
 	static GraphNet graphNet;
@@ -219,6 +220,7 @@ public class Mining {
 
         int lastActivityId = -1;
         String lastCase = "";
+        long lastTime = -1;
         Animation tempAnimation = null;
         Date lastDate = new Date();
         
@@ -238,64 +240,88 @@ public class Mining {
             
     
             if (caseName.equals(lastCase)) {
-                if(!animationCollection.hasAnimation(event.getStartDate().getTime())) {
+                if(lastTime >= event.getStartDate().getTime())
+                	lastTime = lastTime + animationSameTime;
+                else
+                	lastTime = event.getStartDate().getTime();
+                if(!animationCollection.hasAnimation(lastTime)) {
                 	Animation animation = new Animation(animationCollection.activityCount);
-                	animation.setFrame(event.getStartDate().getTime());
+                	animation.setFrame(lastTime);
                 	animationCollection.addAnimation(animation);
                 }
                 	
-                if(!animationCollection.hasAnimation(event.getEndDate().getTime())) {
+                if(lastTime >= event.getEndDate().getTime())
+                	lastTime = lastTime + animationSameTime;
+                else
+                	lastTime = event.getEndDate().getTime();
+                if(!animationCollection.hasAnimation(lastTime)) {
                 	Animation animation = new Animation(animationCollection.activityCount);
-                	animation.setFrame(event.getEndDate().getTime());
+                	animation.setFrame(lastTime);
                 	animationCollection.addAnimation(animation);
                 }
              } else {
                 if (lastActivityId == -1) {
-                    if(!animationCollection.hasAnimation(event.getStartDate().getTime())) {
+                    lastTime = event.getStartDate().getTime() - animationPrepareTime;
+                    if(!animationCollection.hasAnimation(lastTime)) {
                     	Animation animation = new Animation(animationCollection.activityCount);
-                    	animation.setFrame(event.getStartDate().getTime());
+                    	animation.setFrame(lastTime);
+                    	animationCollection.addAnimation(animation);
+                        animationCollection.setBeginTime(lastTime);
+                    }
+                	
+                    lastTime = event.getStartDate().getTime();
+                    if(!animationCollection.hasAnimation(lastTime)) {
+                    	Animation animation = new Animation(animationCollection.activityCount);
+                    	animation.setFrame(lastTime);
                     	animationCollection.addAnimation(animation);
                     }
                     	
-                    if(!animationCollection.hasAnimation(event.getEndDate().getTime())) {
+                    if(lastTime >= event.getEndDate().getTime())
+                    	lastTime = lastTime + animationSameTime;
+                    else
+                    	lastTime = event.getEndDate().getTime();
+                    if(!animationCollection.hasAnimation(lastTime)) {
                     	Animation animation = new Animation(animationCollection.activityCount);
-                    	animation.setFrame(event.getEndDate().getTime());
+                    	animation.setFrame(lastTime);
                     	animationCollection.addAnimation(animation);
-                    }
-                    
-                    if(!animationCollection.hasAnimation(event.getStartDate().getTime() - animationPrepareTime)) {
-                    	Animation animation = new Animation(animationCollection.activityCount);
-                    	animation.setFrame(event.getStartDate().getTime() - animationPrepareTime);
-                    	animationCollection.addAnimation(animation);
-                        animationCollection.setBeginTime(event.getStartDate().getTime() - animationPrepareTime);
                     }
                 } else{
-                    if(!animationCollection.hasAnimation(event.getStartDate().getTime())) {
+                	if(lastTime >= lastEvent.getEndDate().getTime() + animationPrepareTime)
+                    	lastTime = lastTime + animationSameTime;
+                    else
+                    	lastTime = lastEvent.getEndDate().getTime() + animationPrepareTime;
+                    if(!animationCollection.hasAnimation(lastTime)) {
                     	Animation animation = new Animation(animationCollection.activityCount);
-                    	animation.setFrame(event.getStartDate().getTime());
+                    	animation.setFrame(lastTime);
+                    	animationCollection.addAnimation(animation);
+                        animationCollection.setEndTime(lastTime);
+                    }
+
+                    lastTime = event.getStartDate().getTime() - animationPrepareTime;
+                    if(!animationCollection.hasAnimation(lastTime)) {
+                    	Animation animation = new Animation(animationCollection.activityCount);
+                    	animation.setFrame(lastTime);
+                    	animationCollection.addAnimation(animation);
+                        animationCollection.setBeginTime(lastTime);
+                    }
+                	
+                    lastTime = event.getStartDate().getTime();
+                    if(!animationCollection.hasAnimation(lastTime)) {
+                    	Animation animation = new Animation(animationCollection.activityCount);
+                    	animation.setFrame(lastTime);
                     	animationCollection.addAnimation(animation);
                     }
                     	
-                    if(!animationCollection.hasAnimation(event.getEndDate().getTime())) {
+                    if(lastTime >= event.getEndDate().getTime())
+                    	lastTime = lastTime + animationSameTime;
+                    else
+                    	lastTime = event.getEndDate().getTime();
+                    if(!animationCollection.hasAnimation(lastTime)) {
                     	Animation animation = new Animation(animationCollection.activityCount);
-                    	animation.setFrame(event.getEndDate().getTime());
+                    	animation.setFrame(lastTime);
                     	animationCollection.addAnimation(animation);
                     }
-                    
-                    if(!animationCollection.hasAnimation(event.getStartDate().getTime() - animationPrepareTime)) {
-                    	Animation animation = new Animation(animationCollection.activityCount);
-                    	animation.setFrame(event.getStartDate().getTime() - animationPrepareTime);
-                    	animationCollection.addAnimation(animation);
-                        animationCollection.setBeginTime(event.getStartDate().getTime() - animationPrepareTime);
-                    }
-                    
-                    if(!animationCollection.hasAnimation(lastEvent.getEndDate().getTime() + animationPrepareTime)) {
-                    	Animation animation = new Animation(animationCollection.activityCount);
-                    	animation.setFrame(lastEvent.getEndDate().getTime() + animationPrepareTime);
-                    	animationCollection.addAnimation(animation);
-                        animationCollection.setEndTime(lastEvent.getEndDate().getTime() + animationPrepareTime);
-                    }
-                }
+               }
                 
                 lastCase = caseName;
                 lastActivityId = activityId;
@@ -303,11 +329,15 @@ public class Mining {
         }
         
         Event tempEvent = eventCollection.getEvent(eventCollection.getSize() - 1);
-        if(!animationCollection.hasAnimation(tempEvent.getEndDate().getTime() + animationPrepareTime)) {
+        if(lastTime >= tempEvent.getEndDate().getTime() + animationPrepareTime)
+        	lastTime = lastTime + animationSameTime;
+        else
+        	lastTime = tempEvent.getEndDate().getTime() + animationPrepareTime;
+        if(!animationCollection.hasAnimation(lastTime)) {
         	Animation animation = new Animation(animationCollection.activityCount);
-        	animation.setFrame(tempEvent.getEndDate().getTime() + animationPrepareTime);
+        	animation.setFrame(lastTime);
         	animationCollection.addAnimation(animation);
-            animationCollection.setEndTime(tempEvent.getEndDate().getTime() + animationPrepareTime);
+            animationCollection.setEndTime(lastTime);
         }
         
         animationCollection.merge(); // set drag frame
@@ -316,6 +346,8 @@ public class Mining {
         lastCase = "";
         tempAnimation = null;
         lastDate = new Date();
+        lastTime = -1;
+        long thisTime = -1;
         
         for (int i = 0; i < eventCollection.getSize(); i++) {
             Event event = eventCollection.getEvent(i);
@@ -329,128 +361,157 @@ public class Mining {
             int index = -1;
             
             if (caseName.equals(lastCase)) {
-            	index = animationCollection.getIndex(lastEvent.getEndDate().getTime());
+                lastTime = thisTime;
+            	if(thisTime >= event.getStartDate().getTime())
+                	thisTime = thisTime + animationSameTime;
+                else
+                	thisTime = event.getStartDate().getTime();
+            	index = animationCollection.getIndex(lastTime);
             	tempAnimation = animationCollection.getAnimation(index);
 //            	while(tempAnimation.getFrame() < event.getStartDate().getTime()) {
                 	tempAnimation.incActivityQueFre(lastActivityId, activityId);	
-                	tempAnimation.addActivityQueCase(lastActivityId, activityId, event.getCase(), lastEvent.getEndDate().getTime(), event.getStartDate().getTime());
-//                	index++;
-//                	tempAnimation = animationCollection.getAnimation(index);
-//            	}
-
-            	index = animationCollection.getIndex(event.getStartDate().getTime());
-            	tempAnimation = animationCollection.getAnimation(index);
-//            	while(tempAnimation.getFrame() < event.getEndDate().getTime()) {
-                	tempAnimation.incActivityFre(activityId);
-                	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime(), event.getEndDate().getTime());
+                	tempAnimation.addActivityQueCase(lastActivityId, activityId, event.getCase(), lastTime, thisTime);
 //                	index++;
 //                	tempAnimation = animationCollection.getAnimation(index);
 //            	}
                 	
                 for(int it = 0; it < 101; it++){
                 	tempAnimation = animationCollection.dragAnimation[it];
-                	if(lastEvent.getEndDate().getTime() <= tempAnimation.getFrame() && event.getStartDate().getTime() > tempAnimation.getFrame()){
+                	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
 	                	tempAnimation.incActivityQueFre(lastActivityId, activityId);	
-	                	tempAnimation.addActivityQueCase(lastActivityId, activityId, event.getCase(), lastEvent.getEndDate().getTime(), event.getStartDate().getTime());
+	                	tempAnimation.addActivityQueCase(lastActivityId, activityId, event.getCase(), lastTime, thisTime);
                 	}
                 }
+
+                lastTime = thisTime;
+            	if(thisTime >= event.getEndDate().getTime())
+                	thisTime = thisTime + animationSameTime;
+                else
+                	thisTime = event.getEndDate().getTime();
+            	index = animationCollection.getIndex(lastTime);
+            	tempAnimation = animationCollection.getAnimation(index);
+//            	while(tempAnimation.getFrame() < event.getEndDate().getTime()) {
+                	tempAnimation.incActivityFre(activityId);
+                	tempAnimation.addActivityCase(activityId, event.getCase(), lastTime, thisTime);
+//                	index++;
+//                	tempAnimation = animationCollection.getAnimation(index);
+//            	}
                 
                 for(int it = 0; it < 101; it++){
                 	tempAnimation = animationCollection.dragAnimation[it];
-                	if(event.getStartDate().getTime() <= tempAnimation.getFrame() && event.getEndDate().getTime() > tempAnimation.getFrame()){
+                	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
                     	tempAnimation.incActivityFre(activityId);
-                    	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime(), event.getEndDate().getTime());
+                    	tempAnimation.addActivityCase(activityId, event.getCase(), lastTime, thisTime);
                 	}
                 }
              } else {
                 if (lastActivityId == -1) {
-                	index = animationCollection.getIndex(event.getStartDate().getTime() - animationPrepareTime);
+                   	lastTime = event.getStartDate().getTime() - animationPrepareTime;
+                   	thisTime = event.getStartDate().getTime();
+                	index = animationCollection.getIndex(lastTime);
                 	tempAnimation = animationCollection.getAnimation(index);
 //                	while(tempAnimation.getFrame() < event.getStartDate().getTime()) {
                     	tempAnimation.incActivityQueFre(0, activityId);
-                    	tempAnimation.addActivityQueCase(0, activityId, event.getCase(), event.getStartDate().getTime() - animationPrepareTime, event.getStartDate().getTime());
+                    	tempAnimation.addActivityQueCase(0, activityId, event.getCase(), lastTime, thisTime);
 //                    	index++;
 //                    	tempAnimation = animationCollection.getAnimation(index);
 //                	}
-                	
-                	index = animationCollection.getIndex(event.getStartDate().getTime());
-                	tempAnimation = animationCollection.getAnimation(index);
-//                	while(tempAnimation.getFrame() < event.getEndDate().getTime()) {
-                    	tempAnimation.incActivityFre(activityId);	
-                    	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime(), event.getEndDate().getTime());
-//                    	index++;
-//                    	tempAnimation = animationCollection.getAnimation(index);
-//                	}
-                    	
-                    for(int it = 0; it < 101; it++){
-                    	tempAnimation = animationCollection.dragAnimation[it];
-                    	if(event.getStartDate().getTime() - animationPrepareTime <= tempAnimation.getFrame() && event.getStartDate().getTime() > tempAnimation.getFrame()){
-                        	tempAnimation.incActivityFre(activityId);
-                        	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime() - animationPrepareTime, event.getStartDate().getTime());
-                    	}
-                    }
                     
                     for(int it = 0; it < 101; it++){
                     	tempAnimation = animationCollection.dragAnimation[it];
-                    	if(event.getStartDate().getTime() <= tempAnimation.getFrame() && event.getEndDate().getTime() > tempAnimation.getFrame()){
+                    	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
+                        	tempAnimation.incActivityQueFre(0, activityId);
+                        	tempAnimation.addActivityQueCase(0, activityId, event.getCase(), lastTime, thisTime);
+                    	}
+                    }
+                    	
+                    lastTime = thisTime;
+                	if(thisTime >= event.getEndDate().getTime())
+                    	thisTime = thisTime + animationSameTime;
+                    else
+                    	thisTime = event.getEndDate().getTime();
+                	index = animationCollection.getIndex(lastTime);
+                	tempAnimation = animationCollection.getAnimation(index);
+//                	while(tempAnimation.getFrame() < event.getEndDate().getTime()) {
+                    	tempAnimation.incActivityFre(activityId);	
+                    	tempAnimation.addActivityCase(activityId, event.getCase(), lastTime, thisTime);
+//                    	index++;
+//                    	tempAnimation = animationCollection.getAnimation(index);
+//                	}
+                    
+                    for(int it = 0; it < 101; it++){
+                    	tempAnimation = animationCollection.dragAnimation[it];
+                    	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
                         	tempAnimation.incActivityFre(activityId);
-                        	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime(), event.getEndDate().getTime());
+                        	tempAnimation.addActivityCase(activityId, event.getCase(), lastTime, thisTime);
                     	}
                     }
                 } else{
-                	index = animationCollection.getIndex(lastEvent.getEndDate().getTime());
+                    lastTime = thisTime;
+                	if(thisTime >= lastEvent.getEndDate().getTime() + animationPrepareTime)
+                    	thisTime = thisTime + animationSameTime;
+                    else
+                    	thisTime = lastEvent.getEndDate().getTime() + animationPrepareTime;
+                	index = animationCollection.getIndex(lastTime);
                 	tempAnimation = animationCollection.getAnimation(index);
 //                	while(tempAnimation.getFrame() < lastEvent.getEndDate().getTime() + animationPrepareTime) {
                     	tempAnimation.incActivityQueFre(lastActivityId, 1);
-                    	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), lastEvent.getEndDate().getTime(), lastEvent.getEndDate().getTime() + animationPrepareTime);
+                    	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), lastTime, thisTime);
 //                    	index++;
 //                    	tempAnimation = animationCollection.getAnimation(index);
 //                	}
                 	
+                    for(int it = 0; it < 101; it++){
+                    	tempAnimation = animationCollection.dragAnimation[it];
+                    	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
+                        	tempAnimation.incActivityQueFre(lastActivityId, 1);
+                        	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), lastTime, thisTime);
+                    	}
+                    }
+                    	
                 	index = animationCollection.getIndex(lastEvent.getEndDate().getTime() + animationPrepareTime);
                 	tempAnimation = animationCollection.getAnimation(index);
 //                	tempAnimation.incActivityQueFre(lastActivityId, 1);
                 	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), -1, -1);
                 	
-                	index = animationCollection.getIndex(event.getStartDate().getTime() - animationPrepareTime);
+                   	lastTime = event.getStartDate().getTime() - animationPrepareTime;
+                   	thisTime = event.getStartDate().getTime();
+                	index = animationCollection.getIndex(lastTime);
                 	tempAnimation = animationCollection.getAnimation(index);
 //                	while(tempAnimation.getFrame() < event.getStartDate().getTime()) {
                     	tempAnimation.incActivityQueFre(0, activityId);
-                    	tempAnimation.addActivityQueCase(0, activityId, event.getCase(), event.getStartDate().getTime() - animationPrepareTime, event.getStartDate().getTime());
+                    	tempAnimation.addActivityQueCase(0, activityId, event.getCase(), lastTime, thisTime);
 //                    	index++;
 //                    	tempAnimation = animationCollection.getAnimation(index);
 //                	}
-                	
-                	index = animationCollection.getIndex(event.getStartDate().getTime());
+                    
+                    for(int it = 0; it < 101; it++){
+                    	tempAnimation = animationCollection.dragAnimation[it];
+                    	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
+                        	tempAnimation.incActivityQueFre(0, activityId);
+                        	tempAnimation.addActivityQueCase(0, activityId, event.getCase(), lastTime, thisTime);
+                    	}
+                    }
+                    	
+                    lastTime = thisTime;
+                	if(thisTime >= event.getEndDate().getTime())
+                    	thisTime = thisTime + animationSameTime;
+                    else
+                    	thisTime = event.getEndDate().getTime();
+                	index = animationCollection.getIndex(lastTime);
                 	tempAnimation = animationCollection.getAnimation(index);
 //                	while(tempAnimation.getFrame() < event.getEndDate().getTime()) {
                     	tempAnimation.incActivityFre(activityId);	
-                    	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime(), event.getEndDate().getTime());
+                    	tempAnimation.addActivityCase(activityId, event.getCase(), lastTime, thisTime);
 //                    	index++;
 //                    	tempAnimation = animationCollection.getAnimation(index);
 //                	}
-                    	
-                    for(int it = 0; it < 101; it++){
-                    	tempAnimation = animationCollection.dragAnimation[it];
-                    	if(lastEvent.getEndDate().getTime() <= tempAnimation.getFrame() && lastEvent.getEndDate().getTime() + animationPrepareTime > tempAnimation.getFrame()){
-                        	tempAnimation.incActivityFre(activityId);
-                        	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), lastEvent.getEndDate().getTime(), lastEvent.getEndDate().getTime() + animationPrepareTime);
-                    	}
-                    }
                     
                     for(int it = 0; it < 101; it++){
                     	tempAnimation = animationCollection.dragAnimation[it];
-                    	if(event.getStartDate().getTime() - animationPrepareTime <= tempAnimation.getFrame() && event.getStartDate().getTime() > tempAnimation.getFrame()){
+                    	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
                         	tempAnimation.incActivityFre(activityId);
-                        	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime() - animationPrepareTime, event.getStartDate().getTime());
-                    	}
-                    }
-                    
-                    for(int it = 0; it < 101; it++){
-                    	tempAnimation = animationCollection.dragAnimation[it];
-                    	if(event.getStartDate().getTime() <= tempAnimation.getFrame() && event.getEndDate().getTime() > tempAnimation.getFrame()){
-                        	tempAnimation.incActivityFre(activityId);
-                        	tempAnimation.addActivityCase(activityId, event.getCase(), event.getStartDate().getTime(), event.getEndDate().getTime());
+                        	tempAnimation.addActivityCase(activityId, event.getCase(), lastTime, thisTime);
                     	}
                     }
                 }
@@ -463,20 +524,26 @@ public class Mining {
         int index = -1;
         Event lastEvent = eventCollection.getEvent(eventCollection.getSize() - 1);
         int activityId = animationCollection.getActivityId(lastEvent.getActivity());
-    	index = animationCollection.getIndex(lastEvent.getEndDate().getTime());
+        
+        lastTime = thisTime;
+    	if(thisTime >= lastEvent.getEndDate().getTime() + animationPrepareTime)
+        	thisTime = thisTime + animationSameTime;
+        else
+        	thisTime = lastEvent.getEndDate().getTime() + animationPrepareTime;
+    	index = animationCollection.getIndex(lastTime);
     	tempAnimation = animationCollection.getAnimation(index);
 //    	while(tempAnimation.getFrame() < lastEvent.getEndDate().getTime() + animationPrepareTime) {
-        	tempAnimation.incActivityQueFre(activityId, 1);
-        	tempAnimation.addActivityQueCase(activityId, 1, lastEvent.getCase(), lastEvent.getEndDate().getTime(), lastEvent.getEndDate().getTime() + animationPrepareTime);
+        	tempAnimation.incActivityQueFre(lastActivityId, 1);
+        	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), lastTime, thisTime);
 //        	index++;
 //        	tempAnimation = animationCollection.getAnimation(index);
 //    	}
-        	
+    	
         for(int it = 0; it < 101; it++){
         	tempAnimation = animationCollection.dragAnimation[it];
-        	if(lastEvent.getEndDate().getTime() <= tempAnimation.getFrame() && lastEvent.getEndDate().getTime() + animationPrepareTime > tempAnimation.getFrame()){
-            	tempAnimation.incActivityFre(activityId);
-            	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), lastEvent.getEndDate().getTime(), lastEvent.getEndDate().getTime() + animationPrepareTime);
+        	if(lastTime <= tempAnimation.getFrame() && thisTime > tempAnimation.getFrame()){
+            	tempAnimation.incActivityQueFre(lastActivityId, 1);
+            	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), lastTime, thisTime);
         	}
         }
     	
