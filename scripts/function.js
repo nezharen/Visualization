@@ -485,30 +485,22 @@ function setChart()
 	var options = {
 		chart: {
 			renderTo: "chart",
-			type: "bar"
+			type: "pie"
+		},
+		tooltip: {
+			pointFormat: "{series.name}: <b>{point.y}</b>"
 		},
 		title: {
 			text: null
 		},
-		legend: {
-			enabled: false
-		},
-		xAxis: {
-			categories: []
-		},
-		yAxis: {
-			title: {
-				text: $("#edgetype").val()
-			}
-		},
 		series: [{
+			name: $("#edgetype").val(),
 			data: []
 		}]
 	};
 	for (var i = 0; i < activityNum; i++)
 	{
-		options["xAxis"]["categories"].push(i);
-		options["series"][0]["data"].push(graph[$("#edgetype").val()][i]);
+		options["series"][0]["data"].push({"name": i, "y": graph[$("#edgetype").val()][i]});
 	}
 	chart = Highcharts.chart(options);
 }
@@ -574,6 +566,7 @@ function init()
 				calcTopoLayout();
 				calcLayout();
 				repaint();
+				setChart();
 				resetProperty();
 				});
 			$("#threshold").change(function() {
