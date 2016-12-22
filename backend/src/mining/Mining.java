@@ -27,11 +27,12 @@ public class Mining {
 	static final boolean hasTableHead = true;
 	static final String encodingText = "GBK";
 	static final String timestamp = "dd.MM.yy HH:mm";
-	static final long animationPrepareTime = 1000;
+	long animationPrepareTime = 1000;
 	
 	static EventCollection eventCollection;
 	static GraphNet graphNet;
 	static AnimationCollection animationCollection;
+	static ActivityCollection activityCollection;
 	String[][] rowData;
 	
 	public Mining() {
@@ -42,12 +43,15 @@ public class Mining {
 		writeGraphNet();
 		setAnimation();
 		writeAnimation();
+		setActivityCollection();
+		writeActivity();
 	}
 	
 	public void init() {
         eventCollection = new EventCollection();
         graphNet = new GraphNet();
         animationCollection = new AnimationCollection();
+        activityCollection = new ActivityCollection();
 	}
 	
 	public void readCsv() {
@@ -195,8 +199,8 @@ public class Mining {
         graphNet.addActivityQueFre(
                 lastActivityId, 1);
 
-        graphNet.beginTime /= 1000*60*60;
-        graphNet.endTime /= 1000*60*60;
+//        graphNet.beginTime /= 1000*60*60;
+//        graphNet.endTime /= 1000*60*60;
         
         for (int i = 0; i < graphNet.activityCount; i++)
             for (int j = 0; j < graphNet.activityCount; j++)
@@ -204,6 +208,8 @@ public class Mining {
                 graphNet.activityQueFreSort.add(graphNet.activityQueFre[i][j]);
             }
         Collections.sort(graphNet.activityQueFreSort);
+        
+        animationPrepareTime = (graphNet.endTime - graphNet.beginTime) / 120;
     }
     
     public void setAnimation() {
@@ -480,6 +486,28 @@ public class Mining {
     	tempAnimation.addActivityQueCase(lastActivityId, 1, lastEvent.getCase(), -1, -1);
     }
     
+    //更新activity集
+    public void setActivityCollection() {
+        for (int i = 0; i < eventCollection.getSize(); i++) {
+            Event event = eventCollection.getEvent(i);
+            
+            Activity activity = activityCollection.getActivity(event.getActivity());
+            if(activity == null){
+            	activity = new Activity();
+            	activity.setActivity(event.getActivity());
+                activityCollection.addActivity(activity);
+            }
+            
+            activity.addFrequency();
+            activity.addDuration(event.getTime());
+        }
+        for(int i = 0; i < activityCollection.getSize(); i++)
+        {
+            Activity activity = activityCollection.getActivity(i);
+            activity.sort();
+        }
+    }
+    
     public void writeGraphNet() throws JSONException {
 		JSONObject json = new JSONObject();
 		
@@ -635,6 +663,8 @@ public class Mining {
 				}
 				frame.put("edge_case", edgeCaseList);
 				
+				frame.put("index", animationCollection.animationFrame[i]);
+				
 				dragFrameList.put(frame);
 				if(i == 100)
 					fw.write(frame.toString() + "\n");
@@ -735,6 +765,64 @@ public class Mining {
     	} catch (Exception ex) {
     		ex.printStackTrace();
     	}
+    }
+    
+    public void writeActivity() throws JSONException {
+		JSONObject json = new JSONObject();
+		
+		int size = activityCollection.getSize();
+		long[] aggregateDuration = new long[size];
+		long[] meanDuration = new long[size];
+		long[] medianDuration = new long[size];
+		long[] durationRange = new long[size];
+		int[] frequency = new int[size];
+		String[] activityName = new String[size];
+		for(int i = 0; i < size; i++){
+			Activity activity = activityCollection.getActivity(i);
+			activityName[i] = activity.getActivity();
+			aggregateDuration[i] = activity.getAggregateDuration();
+			meanDuration[i] = activity.getMeanDuration();
+			medianDuration[i] = activity.getMedianDuration();
+			durationRange[i] = activity.getDurationRange();
+			frequency[i] = activity.getFrequency();
+		}
+		
+		json.put("activity_name", activityName);
+		json.put("aggregate_duration", aggregateDuration);
+		json.put("mean_duration", meanDuration);
+		json.put("median_duration", medianDuration);
+		json.put("duration_range", durationRange);
+		json.put("frequency", frequency);
+		
+		save("activity.json", json.toString(4));
+//		JSONArray vertexList = new JSONArray();
+//		for (int i = 0; i < graphNet.activityCount; i++) {
+//			JSONObject vertex = new JSONObject();
+//			vertex.put("name", graphNet.activityNames[i]);
+//			vertex.put("event_frequency", graphNet.activityFre[i]);
+//			vertex.put("case_frequency", graphNet.activityCaseFre[i]);
+//			vertex.put("max_repetitions", graphNet.maxActivityRep[i]);
+//			vertex.put("total_duration", graphNet.activityTime[i]);
+//			vertex.put("max_duration", graphNet.maxActivityTime[i]);
+//			vertex.put("min_duration", graphNet.minActivityTime[i]);
+//			vertexList.put(vertex);
+//		}
+//		json.put("vertex", vertexList);
+		
+//		JSONArray edgeList = new JSONArray();
+//		for (int i = 0; i < graphNet.activityCount; i++) {
+//			for (int j = 0; i < graphNet.activityCount; i++) {
+//			JSONObject edge = new JSONObject();
+//			edge.put("name", graphNet.activityNames[i]);
+//			edge.put("event_frequency", graphNet.activityFre[i]);
+//			edge.put("case_frequency", graphNet.activityCaseFre[i]);
+//			edge.put("max_repetitions", graphNet.maxActivityRep[i]);
+//			edge.put("total_duration", graphNet.activityTime[i]);
+//			edge.put("max_duration", graphNet.maxActivityTime[i]);
+//			edge.put("min_duration", graphNet.minActivityTime[i]);
+//			edgeList.put(edge);
+//		}
+//		json.put("edge", edgeList);
     }
     
 	public void save(String fileName, String content) {
