@@ -13,19 +13,16 @@
           <svg id="svg" style="width:100%; height:90%"></svg>
 	  <div style="width:100%; height:10%">
 	    <div class="row">
-	      <div class="col-xs-2">
-	        <button id="backward" type="button" class="btn btn-default" aria-label="后退">
-	          <span class="glyphicon glyphicon-backward" aria-hidden="true"></span>
-	        </button>
+	      <div class="col-xs-1">
 	        <button id="play" type="button" class="btn btn-default" aria-label="播放">
 	          <span class="glyphicon glyphicon-play" aria-hidden="true"></span>
 	        </button>
-	        <button id="forward" type="button" class="btn btn-default" aria-label="前进">
-	          <span class="glyphicon glyphicon-forward" aria-hidden="true"></span>
-	        </button>
 	      </div>
-	      <div class="col-xs-9">
+	      <div class="col-xs-7">
 	        <input id="position" class="form-control" type="range" min="0" max="100" value="0" />
+	      </div>
+		  <div class="col-xs-2">
+	        <input id="playSpeed" class="form-control" type="range" min="0" max="100" value="0" />
 	      </div>
 	      <div class="col-xs-1">
 	        <button id="resize" type="button" class="btn btn-default" aria-label="缩放还原">

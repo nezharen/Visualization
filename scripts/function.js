@@ -607,8 +607,8 @@ function init()
 		animationJson = data;
 
 		time = 0;		//当前时刻
-		timeMax = 5000;	//动画总时长
-		period = 50;	//刷新率
+		period = 30;	//刷新率
+		playTime = 100000 - 900 * ($("#playSpeed").val());	//播放总时长
 
 		frame = animationJson.begin;	//当前帧数
 
@@ -640,10 +640,10 @@ function init()
 }
 
 function frameToTime(frame){
-	return parseInt((frame - animationJson.begin) / (animationJson.end - animationJson.begin) * timeMax);
+	return parseInt((frame - animationJson.begin) / (animationJson.end - animationJson.begin) * playTime);
 }
 function timeToFrame(time){
-	return parseInt(time / timeMax * (animationJson.end - animationJson.begin) + animationJson.begin);
+	return parseInt(time / playTime * (animationJson.end - animationJson.begin) + animationJson.begin);
 }
 
 function testRepeatTime(){
@@ -734,7 +734,7 @@ function updateCase(){
 $(document).ready(init);
 
 function update(){
-	if(time >= timeMax){
+	if(time >= playTime){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
 		time = 0;
 		frameListIndex = 0;
@@ -751,7 +751,7 @@ function update(){
 			break;
 	}
 	repaint();
-	$("#position").val(time / timeMax * 100);
+	$("#position").val(time / playTime * 100);
 	time += period;
 }
 
@@ -810,3 +810,10 @@ $("#play").click(function() {
 	}
 });
 
+$("#playSpeed").change(function() {
+	// 播放总时长维持在100s - 10s
+	playTime = 100000 - 900 * ($("#playSpeed").val()) ;
+	time = timeToFrame(frame);
+	setPosition();	//该函数有保存作用
+	repaint();
+});
