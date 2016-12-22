@@ -380,13 +380,18 @@ function paint()
 		.text(function(d, i) { return i; });
 		//.text(function(d, i) { return graph["activity_name"][i]; });
 	var lineFunction = function(d) {
-		var s = "";
-		for (var i = 0; i < d.length; i += 2)
-			if (i == 0)
-				s += "M " + d[i].x + " " + d[i].y;
-			else
-				s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
-		return s;
+		// var s = "";
+		// for (var i = 0; i < d.length; i += 2)
+		// 	if (i == 0)
+		// 		s += "M " + d[i].x + " " + d[i].y;
+		// 	else
+		// 		s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
+		// return s;
+		if(d.length == 5)
+			//return ("M" + d[0].x + "," + d[0].y + " C" + d[2].x + "," + d[2].y + " " + d[4].x + " ," + d[4].y);
+			return ("M " + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
+		else 
+			return "";
 	};
 	edgePaths = [];
 	for (var i = 0; i < activityNum; i++)
@@ -406,6 +411,27 @@ function paint()
 		}
 	}
 }
+/*
+function getCircleX(d){
+	from = d.from;
+	to = d.to;
+	begin = d.begin;
+	end = d.end;
+	x1 = pathLayout[edgeType][from][to][0].x;
+	x2 = pathLayout[edgeType][from][to][4].x;
+	rate = (frame - begin) / (end - begin);
+	return rate * (x2 - x1) + x1;
+}
+function getCircleY(d){
+	from = d.from;
+	to = d.to;
+	begin = d.begin;
+	end = d.end;
+	y1 = pathLayout[edgeType][from][to][0].y;
+	y2 = pathLayout[edgeType][from][to][4].y;
+	rate = (frame - begin) / (end - begin);
+	return rate * (y2 - y1) + y1;
+}*/
 
 function repaint()
 {
@@ -421,12 +447,17 @@ function repaint()
 		.attr("y", rectHeight / 2);
 	var lineFunction = function(d) {
 		var s = "";
-		for (var i = 0; i < d.length; i += 2)
-			if (i == 0)
-				s += "M " + d[i].x + " " + d[i].y;
-			else
-				s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
-		return s;
+		// for (var i = 0; i < d.length; i += 2)
+		// 	if (i == 0)
+		// 		s += "M " + d[i].x + " " + d[i].y;
+		// 	else
+		// 		s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
+		// return s;
+		if(d.length == 5)
+			//return ("M" + d[0].x + "," + d[0].y + " C" + d[2].x + "," + d[2].y + " " + d[4].x + " ," + d[4].y);
+			return ("M " + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
+		else 
+			return "";
 	};
 	for (var i = 0; i < activityNum; i++)
 		for (var j = 0; j < activityNum; j++)
@@ -434,7 +465,65 @@ function repaint()
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
 				.attr("stroke", edgeColorScale(edge_count[i][j]))
 				.attr("stroke-width", edgeWidthScale(edge_count[i][j]))
+
+	/*for (var i = 0; i < livingCase.length; i++){
+		if(livingCase[i].from == undefined)
+			continue;
+		if(pathLayout[edgeType][livingCase[i].from][livingCase[i].to].length == 0)	//该边不存在
+			continue;
+		caseCircle[i]
+	        .attr("stroke","yellow")
+	        .attr("fill","red")
+	        .attr("cx", getCircleX(livingCase[i].from,livingCase[i].to,livingCase[i].begin,livingCase[i].end))
+	        .attr("cy", getCircleY(livingCase[i].from,livingCase[i].to,livingCase[i].begin,livingCase[i].end))
+	        .attr("r", 4);
+	}*/
+
+	d3.select("body").selectAll("circle")
+		.data(livingCase)
+		.enter()
+		.append("circle")
+			.attr("class","circle")
+			.attr("stroke","yellow")
+		    .attr("fill","red")
+		    .attr("cx", function(d){
+		    	if(d.from == undefined)
+					return 100;
+				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
+					return 100;
+		    	var from = d.from;
+				var to = d.to;
+				var begin = d.begin;
+				var end = d.end;
+				x1 = pathLayout[edgeType][from][to][0].x;
+				x2 = pathLayout[edgeType][from][to][4].x;
+				rate = (frame - begin) / (end - begin);
+				return rate * (x2 - x1) + x1;
+		    })
+		    .attr("cy", function(d){
+		    	if(d.from == undefined)
+					return 100;
+				// console.log("xxx");
+				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
+					return 100;
+				console.log("yyy");
+		    	var from = d.from;
+				var to = d.to;
+				var begin = d.begin;
+				var end = d.end;
+				y1 = pathLayout[edgeType][from][to][0].y;
+				y2 = pathLayout[edgeType][from][to][4].y;
+				rate = (frame - begin) / (end - begin);
+				return rate * (y2 - y1) + y1;
+		    })
+	    	.attr("r",4);
+	d3.select("body").selectAll("circle")
+		.data(livingCase)
+		.exit()
+			.remove();
 }
+
+
 
 function resize()
 {
@@ -608,7 +697,9 @@ function init()
 
 		time = 0;		//当前时刻
 		period = 30;	//刷新率
-		playTime = 100000 - 900 * ($("#playSpeed").val());	//播放总时长
+		minTime = 5000;									// 播放最短时长
+		maxTime = 50000;//animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
+		playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());	//播放总时长 10s -100s
 
 		frame = animationJson.begin;	//当前帧数
 
@@ -734,6 +825,8 @@ function updateCase(){
 $(document).ready(init);
 
 function update(){
+
+
 	if(time >= playTime){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
 		time = 0;
@@ -752,6 +845,7 @@ function update(){
 	}
 	repaint();
 	$("#position").val(time / playTime * 100);
+	// console.log(time,$("#position").val());
 	time += period;
 }
 
@@ -792,7 +886,6 @@ function setPosition()
 }
 
 $("#position").change(function() {
-
 	setPosition();
 	repaint();
 });
@@ -802,7 +895,6 @@ $("#play").click(function() {
 		$("#play span").attr("class", "glyphicon glyphicon-pause");
 		setPosition();	//通过进度条判断，不存储time等变量
 		updateInterval = setInterval(update,period);
-
 	}
 	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
@@ -811,8 +903,7 @@ $("#play").click(function() {
 });
 
 $("#playSpeed").change(function() {
-	// 播放总时长维持在100s - 10s
-	playTime = 100000 - 900 * ($("#playSpeed").val()) ;
+	playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());
 	time = timeToFrame(frame);
 	setPosition();	//该函数有保存作用
 	repaint();
