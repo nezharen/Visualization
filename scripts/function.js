@@ -636,7 +636,6 @@ function init()
 	        .range([1, 2]);
 
 		$("#position").val(0);
-		//updateInterval = setInterval(update,period);
 	});
 }
 
@@ -662,8 +661,6 @@ function testRepeatTime(){
 function updateCase(){
 	var tmpFrameList = animationJson.frame_list[frameListIndex];	// 关键当前帧的所有内容
 	var tmpFrame = tmpFrameList.frame;				// 关键当前帧下的帧数
-	if(tmpFrame == 1267490820000)
-		tmpFrame = 1267490820000;
 
 	var toBeDeletedCase = [];
 	//读取activity信息
@@ -737,16 +734,16 @@ function updateCase(){
 $(document).ready(init);
 
 function update(){
-	console.log("update");
 	if(time >= timeMax){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
 		time = 0;
+		frameListIndex = 0;
 	    clearInterval(updateInterval);
 	    console.log("clear");
 	}
 	frame = timeToFrame(time);
-	while(frame >= animationJson.frame_list[frameListIndex].frame){
 
+	while(frame >= animationJson.frame_list[frameListIndex].frame){
 		updateCase();
 		if(frameListIndex < animationJson.frame_list.length - 1)
 			frameListIndex++;
@@ -760,7 +757,6 @@ function update(){
 
 function setPosition()
 {
-	console.log("setPosition");
 	var dragFrameList = animationJson.drag_frame_list[$("#position")[0].value];
 	frame = dragFrameList.frame;
 	time = frameToTime(frame);
@@ -774,6 +770,15 @@ function setPosition()
 		for(var j =0; j < activityNum; j++){
 			edge_count[i][j] = 0;
 		}
+	}
+
+	// 最好处理数据能给出当前帧对应frame_list的位置，避免遍历
+	frameListIndex = 0;				//维护frameListIndex
+	while(frame >= animationJson.frame_list[frameListIndex].frame){
+		if(frameListIndex < animationJson.frame_list.length - 1)
+			frameListIndex++;
+		else
+			break;
 	}
 
 	for(var i = 0; i < dragFrameList.activity_case.length; i++){
@@ -793,11 +798,11 @@ $("#position").change(function() {
 });
 
 $("#play").click(function() {
-	console.log("play");
 	if($("#play span").attr("class") == "glyphicon glyphicon-play"){
 		$("#play span").attr("class", "glyphicon glyphicon-pause");
 		setPosition();	//通过进度条判断，不存储time等变量
 		updateInterval = setInterval(update,period);
+
 	}
 	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
