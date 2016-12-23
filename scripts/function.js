@@ -834,8 +834,8 @@ function update(){
 		else
 			break;
 	}
-	if(frame != animationJson.drag_frame_list[frameListIndex].index)
-		console.log(frame, animationJson.drag_frame_list[frameListIndex].index + "!!!");
+	// if(frame != animationJson.drag_frame_list[frameListIndex].index)
+	// 	console.log(frame, animationJson.drag_frame_list[frameListIndex].index + "!!!");
 	repaint();
 	$("#position").val(time / playTime * 100);
 	// console.log(time,$("#position").val());
