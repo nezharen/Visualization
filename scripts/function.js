@@ -468,7 +468,7 @@ function repaint()
 		    	if(d.from == undefined)
 					return "none";
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
-					return true;
+					return "none";
 				return true;
 		    })
 		    .attr("cx", function(d){
@@ -679,8 +679,8 @@ function init()
 
 		time = 0;		//当前时刻
 		period = 30;	//刷新率
-		minTime = 5000;									// 播放最短时长
-		maxTime = 400000;//animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
+		minTime = 120000;									// 播放最短时长
+		maxTime = animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
 		playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());	//播放总时长 10s -100s
 
 		frame = animationJson.begin;	//当前帧数
@@ -847,17 +847,17 @@ function setPosition()
 			edge_count[i][j] = 0;
 		}
 	}
-
+	frameListIndex = animationJson.drag_frame_list[frameListIndex].index;
 	// 最好处理数据能给出当前帧对应frame_list的位置，避免遍历
-	frameListIndex = 0;				//维护frameListIndex
-	while(frame >= animationJson.frame_list[frameListIndex].frame){
-		if(frameListIndex < animationJson.frame_list.length - 1)
-			frameListIndex++;
-		else
-			break;
-	}
-	// if(frame != animationJson.drag_frame_list[frameListIndex].index)
-	// 	console.log(frame, animationJson.drag_frame_list[frameListIndex].index + "!!!");
+	// frameListIndex = 0;				//维护frameListIndex
+	// while(frame >= animationJson.frame_list[frameListIndex].frame){
+	// 	if(frameListIndex < animationJson.frame_list.length - 1)
+	// 		frameListIndex++;
+	// 	else
+	// 		break;
+	// }
+	// if(frameListIndex != animationJson.drag_frame_list[frameListIndex].index)
+	//  	console.log(frameListIndex, animationJson.drag_frame_list[frameListIndex].index + "!!!");
 
 	for(var i = 0; i < dragFrameList.activity_case.length; i++){
 		livingCase.push(dragFrameList.activity_case[i]);
@@ -877,7 +877,7 @@ $("#position").change(function() {
 $("#play").click(function() {
 	if($("#play span").attr("class") == "glyphicon glyphicon-play"){
 		$("#play span").attr("class", "glyphicon glyphicon-pause");
-		setPosition();	//通过进度条判断，不存储time等变量
+		//setPosition();	//通过进度条判断，不存储time等变量
 		updateInterval = setInterval(update,period);
 	}
 	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){
