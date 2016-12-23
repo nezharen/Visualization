@@ -320,6 +320,24 @@ function showProperty()
 	$("#property-value-2").val(graph[edgeType][pathSelected.x][pathSelected.y]);
 }
 
+var lineFunction = function(d) {
+	var s = "";
+	for (var i = 0; i < d.length; i += 2)
+		if (i == 0)
+			s += "M " + d[i].x + " " + d[i].y;
+		else
+			s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
+	return s;
+};
+
+var lineFunction2 = function(d) {
+	if(d.length == 5)
+		//return ("M" + d[0].x + " " + d[0].y + " Q " + d[2].x + " " + d[2].y + ", " + d[4].x + " " + d[4].y);
+		return ("M" + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
+	else 
+		return "";
+};
+
 function paint()
 {
 	var activityDrag = d3.behavior.drag()
@@ -379,20 +397,7 @@ function paint()
 		.attr("font-weight", "bold")
 		.text(function(d, i) { return i; });
 		//.text(function(d, i) { return graph["activity_name"][i]; });
-	var lineFunction = function(d) {
-		// var s = "";
-		// for (var i = 0; i < d.length; i += 2)
-		// 	if (i == 0)
-		// 		s += "M " + d[i].x + " " + d[i].y;
-		// 	else
-		// 		s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
-		// return s;
-		if(d.length == 5)
-			//return ("M" + d[0].x + "," + d[0].y + " C" + d[2].x + "," + d[2].y + " " + d[4].x + " ," + d[4].y);
-			return ("M " + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
-		else 
-			return "";
-	};
+
 	edgePaths = [];
 	for (var i = 0; i < activityNum; i++)
 	{
@@ -445,20 +450,6 @@ function repaint()
 		.attr("height", rectHeight);
 	activityTexts
 		.attr("y", rectHeight / 2);
-	var lineFunction = function(d) {
-		var s = "";
-		// for (var i = 0; i < d.length; i += 2)
-		// 	if (i == 0)
-		// 		s += "M " + d[i].x + " " + d[i].y;
-		// 	else
-		// 		s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
-		// return s;
-		if(d.length == 5)
-			//return ("M" + d[0].x + "," + d[0].y + " C" + d[2].x + "," + d[2].y + " " + d[4].x + " ," + d[4].y);
-			return ("M " + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
-		else 
-			return "";
-	};
 	for (var i = 0; i < activityNum; i++)
 		for (var j = 0; j < activityNum; j++)
 			edgePaths[i][j]
@@ -843,6 +834,8 @@ function update(){
 		else
 			break;
 	}
+	if(frame != animationJson.drag_frame_list[frameListIndex].index)
+		console.log(frame, animationJson.drag_frame_list[frameListIndex].index + "!!!");
 	repaint();
 	$("#position").val(time / playTime * 100);
 	// console.log(time,$("#position").val());
@@ -908,3 +901,4 @@ $("#playSpeed").change(function() {
 	setPosition();	//该函数有保存作用
 	repaint();
 });
+
