@@ -463,7 +463,7 @@ function paint()
 			edgePaths[i].push([]);
 			edgePaths[i][j] = svgContainer.append("path")
 				.data([{"x": i, "y": j}])
-				.attr("d", lineFunction2(pathLayout[edgeType][i][j]))
+				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
 				.attr("stroke", "black")
 				.attr("stroke-width", 2)
 				.attr("fill", "none")
@@ -489,7 +489,7 @@ function repaint()
 	for (var i = 0; i < activityNum; i++)
 		for (var j = 0; j < activityNum; j++)
 			edgePaths[i][j]
-				.attr("d", lineFunction2(pathLayout[edgeType][i][j]))
+				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
 				.attr("stroke", edgeColorScale(edge_count[i][j]))
 				.attr("stroke-width", edgeWidthScale(edge_count[i][j]))
 
@@ -546,6 +546,7 @@ function repaint()
 	caseCircle
 		.exit()
 			.remove();
+	return true;
 }
 
 function resize()
@@ -710,47 +711,51 @@ function init()
 					}
 				}
 			});
-			$("#loading").modal("toggle");
+
+
+			d3.json("backend/animation.json", function (error, data) {
+				animationJson = data;
+
+				time = 0;		//当前时刻
+				period = 30;	//刷新率
+				minTime = 120000;									// 播放最短时长
+				maxTime = animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
+				playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());	//播放总时长 10s -100s
+
+				//var k = (maxTime - minTime) / 10000000000000000;
+				//playTime = k * ($("#playSpeed").val() - 100) * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100) * ($("#playSpeed").val() - 100) * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100) + minTime;
+
+				frame = animationJson.begin;	//当前帧数
+
+				activity_count = [];			//维护activity的数量
+				edge_count = [];				//维护edge的数量
+				for(i = 0; i < activityNum; i++){
+					activity_count[i] = 0;
+					edge_count.push([]);
+					for(j =0; j < activityNum; j++){
+						edge_count[i][j] = 0;
+					}
+				}
+
+				livingCase = [];				//维护需要显示的case数组
+				frameListIndex = 0;				//frameList的当前索引
+
+				activityColorScale = d3.scale.linear()
+			        .domain([0, 50])
+			        .range(["#add8e6", "blue"]);
+			    edgeColorScale = d3.scale.linear()
+			        .domain([0, 50])
+			        .range(["#f2cbbc", "red"]);
+			    edgeWidthScale = d3.scale.linear()
+			        .domain([0, 50])
+			        .range([1, 2]);
+
+				$("#position").val(0);
+
+				$("#loading").modal("toggle");
+			});
 	});
 
-
-
-	d3.json("backend/animation.json", function (error, data) {
-		animationJson = data;
-
-		time = 0;		//当前时刻
-		period = 30;	//刷新率
-		minTime = 120000;									// 播放最短时长
-		maxTime = animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
-		playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());	//播放总时长 10s -100s
-
-		frame = animationJson.begin;	//当前帧数
-
-		activity_count = [];			//维护activity的数量
-		edge_count = [];				//维护edge的数量
-		for(i = 0; i < activityNum; i++){
-			activity_count[i] = 0;
-			edge_count.push([]);
-			for(j =0; j < activityNum; j++){
-				edge_count[i][j] = 0;
-			}
-		}
-
-		livingCase = [];				//维护需要显示的case数组
-		frameListIndex = 0;				//frameList的当前索引
-
-		activityColorScale = d3.scale.linear()
-	        .domain([0, 50])
-	        .range(["#add8e6", "blue"]);
-	    edgeColorScale = d3.scale.linear()
-	        .domain([0, 50])
-	        .range(["#f2cbbc", "red"]);
-	    edgeWidthScale = d3.scale.linear()
-	        .domain([0, 50])
-	        .range([1, 2]);
-
-		$("#position").val(0);
-	});
 }
 
 function frameToTime(frame){
@@ -785,6 +790,7 @@ function updateCase(){
 			for(var j = 0; j < livingCase.length; j++){
 				if(livingCase[j].case_id == tmpFrameList.activity_case[i].case_id){
 					if(livingCase[j].from == undefined){
+						console.log("");
 						toBeDeletedCase.push(livingCase[j].case_id);
 						break;
 					}
@@ -831,7 +837,7 @@ function updateCase(){
 	}
 	// 最后删掉因为时间冲突之前未删除的(如果预处理数据没有时间为0的activity或edge则不会执行)
 	for(var i = 0; i < toBeDeletedCase.length; i++){
-		console.log("time conflict!");
+		console.log("time conflict! " + toBeDeletedCase[i]);
 		for(var j = livingCase.length - 1; j > 0; j--){
 			if(livingCase[j].case_id == toBeDeletedCase[i]){
 				if(livingCase[j].index != undefined){
@@ -888,25 +894,15 @@ function setPosition()
 			edge_count[i][j] = 0;
 		}
 	}
-	frameListIndex = animationJson.drag_frame_list[frameListIndex].index;
-	// 最好处理数据能给出当前帧对应frame_list的位置，避免遍历
-	// frameListIndex = 0;				//维护frameListIndex
-	// while(frame >= animationJson.frame_list[frameListIndex].frame){
-	// 	if(frameListIndex < animationJson.frame_list.length - 1)
-	// 		frameListIndex++;
-	// 	else
-	// 		break;
-	// }
-	// if(frameListIndex != animationJson.drag_frame_list[frameListIndex].index)
-	//  	console.log(frameListIndex, animationJson.drag_frame_list[frameListIndex].index + "!!!");
+	frameListIndex = dragFrameList.index;
 
 	for(var i = 0; i < dragFrameList.activity_case.length; i++){
 		livingCase.push(dragFrameList.activity_case[i]);
-		activity_count[dragFrameList.activity_case[i].index]++
+		activity_count[dragFrameList.activity_case[i].index]++;
 	}
 	for(var i = 0; i < dragFrameList.edge_case.length; i++){
 		livingCase.push(dragFrameList.edge_case[i]);
-		edge_count[dragFrameList.edge_case[i].from][dragFrameList.edge_case[i].to]++
+		edge_count[dragFrameList.edge_case[i].from][dragFrameList.edge_case[i].to]++;
 	}
 }
 
@@ -929,8 +925,7 @@ $("#play").click(function() {
 
 $("#playSpeed").change(function() {
 	playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());
-	time = timeToFrame(frame);
-	setPosition();	//该函数有保存作用
+	time = frameToTime(frame);
 	repaint();
 });
 
