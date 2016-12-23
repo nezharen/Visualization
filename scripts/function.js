@@ -422,7 +422,7 @@ function paint()
 			edgePaths[i].push([]);
 			edgePaths[i][j] = svgContainer.append("path")
 				.data([{"x": i, "y": j}])
-				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
+				.attr("d", lineFunction2(pathLayout[edgeType][i][j]))
 				.attr("stroke", "black")
 				.attr("stroke-width", 2)
 				.attr("fill", "none")
@@ -431,30 +431,10 @@ function paint()
 		}
 	}
 }
-/*
-function getCircleX(d){
-	from = d.from;
-	to = d.to;
-	begin = d.begin;
-	end = d.end;
-	x1 = pathLayout[edgeType][from][to][0].x;
-	x2 = pathLayout[edgeType][from][to][4].x;
-	rate = (frame - begin) / (end - begin);
-	return rate * (x2 - x1) + x1;
-}
-function getCircleY(d){
-	from = d.from;
-	to = d.to;
-	begin = d.begin;
-	end = d.end;
-	y1 = pathLayout[edgeType][from][to][0].y;
-	y2 = pathLayout[edgeType][from][to][4].y;
-	rate = (frame - begin) / (end - begin);
-	return rate * (y2 - y1) + y1;
-}*/
 
 function repaint()
 {
+	
 	activityContainers
 		.data(layout[edgeType])
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
@@ -468,35 +448,34 @@ function repaint()
 	for (var i = 0; i < activityNum; i++)
 		for (var j = 0; j < activityNum; j++)
 			edgePaths[i][j]
-				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
+				.attr("d", lineFunction2(pathLayout[edgeType][i][j]))
 				.attr("stroke", edgeColorScale(edge_count[i][j]))
 				.attr("stroke-width", edgeWidthScale(edge_count[i][j]))
 
-	/*for (var i = 0; i < livingCase.length; i++){
-		if(livingCase[i].from == undefined)
-			continue;
-		if(pathLayout[edgeType][livingCase[i].from][livingCase[i].to].length == 0)	//该边不存在
-			continue;
-		caseCircle[i]
-	        .attr("stroke","yellow")
-	        .attr("fill","red")
-	        .attr("cx", getCircleX(livingCase[i].from,livingCase[i].to,livingCase[i].begin,livingCase[i].end))
-	        .attr("cy", getCircleY(livingCase[i].from,livingCase[i].to,livingCase[i].begin,livingCase[i].end))
-	        .attr("r", 4);
-	}*/
+	caseCircle = svgContainer.selectAll("circle.caseCircle")
+		.data(livingCase);
 
-	d3.select("body").selectAll("circle")
-		.data(livingCase)
+	//	enter
+	caseCircle
 		.enter()
 		.append("circle")
-			.attr("class","circle")
-			.attr("stroke","yellow")
-		    .attr("fill","red")
+			.attr("class","caseCircle")
+	// update
+	caseCircle
+			.style("stroke","yellow")
+		    .style("fill","red")
+		    .attr("display", function(d){
+		    	if(d.from == undefined)
+					return "none";
+				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
+					return true;
+				return true;
+		    })
 		    .attr("cx", function(d){
 		    	if(d.from == undefined)
-					return 100;
+					return;
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
-					return 100;
+					return;
 		    	var from = d.from;
 				var to = d.to;
 				var begin = d.begin;
@@ -508,11 +487,9 @@ function repaint()
 		    })
 		    .attr("cy", function(d){
 		    	if(d.from == undefined)
-					return 100;
-				// console.log("xxx");
+					return;
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
-					return 100;
-				console.log("yyy");
+					return;
 		    	var from = d.from;
 				var to = d.to;
 				var begin = d.begin;
@@ -520,16 +497,15 @@ function repaint()
 				y1 = pathLayout[edgeType][from][to][0].y;
 				y2 = pathLayout[edgeType][from][to][4].y;
 				rate = (frame - begin) / (end - begin);
+				//console.log(from,to,begin,end,rate);
 				return rate * (y2 - y1) + y1;
 		    })
-	    	.attr("r",4);
-	d3.select("body").selectAll("circle")
-		.data(livingCase)
+	    	.attr("r","4");
+	// exit
+	caseCircle
 		.exit()
 			.remove();
 }
-
-
 
 function resize()
 {
@@ -704,7 +680,7 @@ function init()
 		time = 0;		//当前时刻
 		period = 30;	//刷新率
 		minTime = 5000;									// 播放最短时长
-		maxTime = 50000;//animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
+		maxTime = 400000;//animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
 		playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());	//播放总时长 10s -100s
 
 		frame = animationJson.begin;	//当前帧数
@@ -757,7 +733,7 @@ function testRepeatTime(){
 // 维护livingCase数组
 function updateCase(){
 	var tmpFrameList = animationJson.frame_list[frameListIndex];	// 关键当前帧的所有内容
-	var tmpFrame = tmpFrameList.frame;				// 关键当前帧下的帧数
+	var tmpFrame = tmpFrameList.frame;								// 关键当前帧下的帧数
 
 	var toBeDeletedCase = [];
 	//读取activity信息
@@ -812,8 +788,9 @@ function updateCase(){
 			edge_count[tmpFrameList.edge_case[i].from][tmpFrameList.edge_case[i].to]++;
 		}
 	}
-	// 最后删掉因为时间冲突之前未删除的
+	// 最后删掉因为时间冲突之前未删除的(如果预处理数据没有时间为0的activity或edge则不会执行)
 	for(var i = 0; i < toBeDeletedCase.length; i++){
+		console.log("time conflict!");
 		for(var j = livingCase.length - 1; j > 0; j--){
 			if(livingCase[j].case_id == toBeDeletedCase[i]){
 				if(livingCase[j].index != undefined){
@@ -832,7 +809,6 @@ $(document).ready(init);
 
 function update(){
 
-
 	if(time >= playTime){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
 		time = 0;
@@ -849,8 +825,6 @@ function update(){
 		else
 			break;
 	}
-	// if(frame != animationJson.drag_frame_list[frameListIndex].index)
-	// 	console.log(frame, animationJson.drag_frame_list[frameListIndex].index + "!!!");
 	repaint();
 	$("#position").val(time / playTime * 100);
 	// console.log(time,$("#position").val());
@@ -882,6 +856,8 @@ function setPosition()
 		else
 			break;
 	}
+	// if(frame != animationJson.drag_frame_list[frameListIndex].index)
+	// 	console.log(frame, animationJson.drag_frame_list[frameListIndex].index + "!!!");
 
 	for(var i = 0; i < dragFrameList.activity_case.length; i++){
 		livingCase.push(dragFrameList.activity_case[i]);
