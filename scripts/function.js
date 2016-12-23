@@ -718,7 +718,7 @@ function init()
 
 				time = 0;		//当前时刻
 				period = 30;	//刷新率
-				minTime = 120000;									// 播放最短时长
+				minTime = 120000;										// 播放最短时长
 				maxTime = (animationJson.end - animationJson.begin);	// 播放最长时长为原数据总时长
 
 				s = maxTime / minTime;
@@ -879,7 +879,7 @@ function update(){
 
 function setPosition()
 {
-	var dragFrameList = animationJson.drag_frame_list[$("#position")[0].value];
+	var dragFrameList = animationJson.drag_frame_list[Math.floor($("#position")[0].value)];
 	frame = dragFrameList.frame;
 	time = frameToTime(frame);
 
@@ -902,6 +902,15 @@ function setPosition()
 	for(var i = 0; i < dragFrameList.edge_case.length; i++){
 		livingCase.push(dragFrameList.edge_case[i]);
 		edge_count[dragFrameList.edge_case[i].from][dragFrameList.edge_case[i].to]++;
+	}
+
+	// update
+	while(frame >= animationJson.frame_list[frameListIndex].frame){
+		updateCase();
+		if(frameListIndex < animationJson.frame_list.length - 1)
+			frameListIndex++;
+		else
+			break;
 	}
 }
 
