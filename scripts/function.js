@@ -254,7 +254,7 @@ function calcPathLayout()
 					var controlNum = 3;//must be odd
 					dx = (end.x - start.x) / (controlNum + 1);
 					dy = (end.y - start.y) / (controlNum + 1);
-					t = Math.sqrt(3) / 2;
+					t = Math.sqrt(2) / 2;
 					for (var k = 1; k <= controlNum; k++)
 					{
 						var tx = start.x + dx * k;
@@ -266,13 +266,24 @@ function calcPathLayout()
 							{
 								var ddtx = tx - (layout[edgeType][p].x + rectWidth / 2);
 								var ddty = ty - (layout[edgeType][p].y + rectHeight / 2);
+								if (i == 7 && j == 0 && p == 6 && k == 1)
+									console.log("ddtx=" + ddtx + " " + "ddty=" + ddty + "deg=" + (ddtx * dx + ddty * dy) / Math.sqrt(ddtx * ddtx + ddty * ddty) / Math.sqrt(dx * dx + dy * dy));
 								if (Math.abs((ddtx * dx + ddty * dy) / Math.sqrt(ddtx * ddtx + ddty * ddty) / Math.sqrt(dx * dx + dy * dy)) > t)
 								{
 									var swaper = ddtx;
 									ddtx = ddty;
-									ddty = swaper;
+									ddty = -swaper;
+									if ((dx * ddty + dy * ddty) * (dx * ddty - dy * ddtx) < 0)
+									{
+										ddtx = -ddtx;
+										ddty = -ddty;
+									}
+									if (i == 7 && j == 0 && p == 6 && k == 1)
+										console.log("swap");
 								}
 								var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
+								if (i == 7 && j == 0 && p == 6 && k == 1)
+									console.log("dis=" + dis);
 								ddtx *= 100000 / (dis * dis * dis);
 								ddty *= 100000 /(dis * dis * dis);
 								if (Math.abs(ddtx) > Math.min(minSpaceWidth, svgWidth / 10))
@@ -281,7 +292,11 @@ function calcPathLayout()
 									ddty = ddty / Math.abs(ddty) * Math.min(minSpaceWidth, svgHeight / 10);
 								dtx += ddtx;
 								dty += ddty;
+								if (i == 7 && j == 0 && p == 6 && k == 1)
+									console.log("ddtx=" + ddtx + " " + "ddty=" + ddty);
 							}
+						if (i == 7 && j == 0 && k == 1)
+							console.log("dtx=" + dtx + " " + "dty=" + dty);
 						tx += dtx;
 						ty += dty;
 						pathLayout[edgeType][i][j].push({"x": tx, "y": ty});
