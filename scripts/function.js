@@ -229,6 +229,16 @@ function calcPathLayout()
 						start.x += rectWidth / 2;
 						start.y += rectHeight;
 						end.x += rectWidth / 2;
+						if (i < j)
+						{
+							start.x -= rectWidth / 4;
+							end.x -= rectWidth / 4;
+						}
+						else
+						{
+							start.x += rectWidth / 4;
+							end.x += rectWidth / 4;
+						}
 					}
 					else
 						if (sin <= -t)
@@ -236,6 +246,17 @@ function calcPathLayout()
 							start.x += rectWidth / 2;
 							end.x += rectWidth / 2;
 							end.y += rectHeight;
+							if (i < j)
+							{
+								start.x -= rectWidth / 4;
+								end.x -= rectWidth / 4;
+							}
+							else
+							{
+								start.x += rectWidth / 4;
+								end.x += rectWidth / 4;
+							}
+
 						}
 						else
 							if (cos >= t)
@@ -243,12 +264,32 @@ function calcPathLayout()
 								start.x += rectWidth;
 								start.y += rectHeight / 2;
 								end.y += rectHeight / 2;
+								if (i < j)
+								{
+									start.y -= rectHeight / 4;
+									end.y -= rectHeight / 4;
+								}
+								else
+								{
+									start.y += rectHeight / 4;
+									end.y += rectHeight / 4;
+								}
 							}
 							else
 							{
 								start.y += rectHeight / 2;
 								end.x += rectWidth;
 								end.y += rectHeight / 2;
+								if (i < j)
+								{
+									start.y -= rectHeight / 4;
+									end.y -= rectHeight / 4;
+								}
+								else
+								{
+									start.y += rectHeight / 4;
+									end.y += rectHeight / 4;
+								}
 							}
 					pathLayout[edgeType][i][j].push(start);
 					var controlNum = 3;//must be odd
