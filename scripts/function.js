@@ -205,7 +205,7 @@ function calcPathLayout()
 		for (var j = 0; j < activityNum; j++)
 		{
 			pathLayout[edgeType][i].push([]);
-			if ((i == 0) || (i == 1) || (j == 0) || (j == 1) || (graph[edgeType][i][j] > threshold))
+			if ((((i == 0) || (j == 1)) && (!(((i == 0) && (j == 1)) || (i == j)))) || (graph[edgeType][i][j] > threshold))
 				if (i == j)
 				{
 					var t = Math.min(rectWidth / 2, minSpaceWidth / 2);
