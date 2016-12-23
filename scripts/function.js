@@ -388,8 +388,8 @@ var lineFunction = function(d) {
 
 var lineFunction2 = function(d) {
 	if(d.length == 5)
-		//return ("M" + d[0].x + " " + d[0].y + " Q " + d[2].x + " " + d[2].y + ", " + d[4].x + " " + d[4].y);
-		return ("M" + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
+		return ("M" + d[0].x + " " + d[0].y + " Q " + d[2].x + " " + d[2].y + ", " + d[4].x + " " + d[4].y);
+		//return ("M" + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
 	else 
 		return "";
 };
@@ -475,7 +475,6 @@ function paint()
 
 function repaint()
 {
-	
 	activityContainers
 		.data(layout[edgeType])
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
@@ -789,7 +788,6 @@ function updateCase(){
 			for(var j = 0; j < livingCase.length; j++){
 				if(livingCase[j].case_id == tmpFrameList.activity_case[i].case_id){
 					if(livingCase[j].from == undefined){
-						console.log("");
 						toBeDeletedCase.push(livingCase[j].case_id);
 						break;
 					}
@@ -854,7 +852,6 @@ function updateCase(){
 $(document).ready(init);
 
 function update(){
-
 	if(time >= playTime){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
 		time = 0;
@@ -873,9 +870,11 @@ function update(){
 	}
 	repaint();
 	$("#position").val(time / playTime * 100);
-	// console.log(time,$("#position").val());
+	//console.log(time,$("#position").val());
 	time += period;
 }
+
+
 
 function setPosition()
 {
@@ -914,6 +913,13 @@ function setPosition()
 	}
 }
 
+$("#playSpeed").change(function() {
+	s = maxTime / minTime;
+	playTime = maxTime / (s /(100/ ($("#playSpeed").val()))) ;
+	time = frameToTime(frame);
+	repaint();
+});
+
 $("#position").change(function() {
 	setPosition();
 	repaint();
@@ -931,10 +937,20 @@ $("#play").click(function() {
 	}
 });
 
-$("#playSpeed").change(function() {
-	s = maxTime / minTime;
-	playTime = maxTime / (s /(100/ ($("#playSpeed").val()))) ;
-	time = frameToTime(frame);
-	repaint();
+mousedownPosition = false;
+$("#position").mousedown(function (){
+    mousedownPosition = true;
+	clearInterval(updateInterval);
+	setPosition();
+  	repaint();
 });
-
+$("#position").mouseup(function (){
+	mousedownPosition = false;
+	updateInterval = setInterval(update,period);
+});
+$("#position").mousemove(function (){
+	if(mousedownPosition){
+  		setPosition();
+  		repaint();
+	}
+});
