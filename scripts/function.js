@@ -416,27 +416,6 @@ function paint()
 		}
 	}
 }
-/*
-function getCircleX(d){
-	from = d.from;
-	to = d.to;
-	begin = d.begin;
-	end = d.end;
-	x1 = pathLayout[edgeType][from][to][0].x;
-	x2 = pathLayout[edgeType][from][to][4].x;
-	rate = (frame - begin) / (end - begin);
-	return rate * (x2 - x1) + x1;
-}
-function getCircleY(d){
-	from = d.from;
-	to = d.to;
-	begin = d.begin;
-	end = d.end;
-	y1 = pathLayout[edgeType][from][to][0].y;
-	y2 = pathLayout[edgeType][from][to][4].y;
-	rate = (frame - begin) / (end - begin);
-	return rate * (y2 - y1) + y1;
-}*/
 
 function repaint()
 {
@@ -458,9 +437,9 @@ function repaint()
 				.attr("stroke", edgeColorScale(edge_count[i][j]))
 				.attr("stroke-width", edgeWidthScale(edge_count[i][j]))
 
-
 	caseCircle = svgContainer.selectAll("circle.caseCircle")
 		.data(livingCase);
+
 	//	enter
 	caseCircle
 		.enter()
@@ -470,11 +449,18 @@ function repaint()
 	caseCircle
 			.style("stroke","yellow")
 		    .style("fill","red")
-		    .attr("cx", function(d){
-		    	if(d.from == undefined)	//在矩形里
-					return null;
+		    .attr("display", function(d){
+		    	if(d.from == undefined)
+					return "none";
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
-					return null;
+					return true;
+				return true;
+		    })
+		    .attr("cx", function(d){
+		    	if(d.from == undefined)
+					return;
+				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
+					return;
 		    	var from = d.from;
 				var to = d.to;
 				var begin = d.begin;
@@ -486,10 +472,9 @@ function repaint()
 		    })
 		    .attr("cy", function(d){
 		    	if(d.from == undefined)
-					return 100;
+					return;
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
-					return 100;
-				
+					return;
 		    	var from = d.from;
 				var to = d.to;
 				var begin = d.begin;
