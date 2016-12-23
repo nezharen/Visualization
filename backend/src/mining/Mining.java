@@ -730,7 +730,7 @@ public class Mining {
 				}
 				frame.put("edge_case", edgeCaseList);
 				
-				frame.put("index", animationCollection.animationFrame[i]);
+				frame.put("index", animationCollection.getIndex(animationCollection.animationFrame[i]));
 				
 				dragFrameList.put(frame);
 				if(i == 100)
