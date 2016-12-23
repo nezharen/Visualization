@@ -719,20 +719,19 @@ function init()
 				time = 0;		//当前时刻
 				period = 30;	//刷新率
 				minTime = 120000;									// 播放最短时长
-				maxTime = animationJson.end - animationJson.begin;	// 播放最长时长为原数据总时长
-				playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());	//播放总时长 10s -100s
+				maxTime = (animationJson.end - animationJson.begin);	// 播放最长时长为原数据总时长
 
-				//var k = (maxTime - minTime) / 10000000000000000;
-				//playTime = k * ($("#playSpeed").val() - 100) * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100) * ($("#playSpeed").val() - 100) * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100)  * ($("#playSpeed").val() - 100) + minTime;
+				s = maxTime / minTime;
+				playTime = maxTime / (s /(100/ ($("#playSpeed").val()))) ;
 
 				frame = animationJson.begin;	//当前帧数
 
 				activity_count = [];			//维护activity的数量
 				edge_count = [];				//维护edge的数量
-				for(i = 0; i < activityNum; i++){
+				for(var i = 0; i < activityNum; i++){
 					activity_count[i] = 0;
 					edge_count.push([]);
-					for(j =0; j < activityNum; j++){
+					for(var j =0; j < activityNum; j++){
 						edge_count[i][j] = 0;
 					}
 				}
@@ -808,7 +807,7 @@ function updateCase(){
 	for(var i = 0; i < tmpFrameList.edge_case.length; i++){
 
 		if(tmpFrameList.edge_case[i].begin == -1){	// 整个case结束
-			for(j = 0; j < livingCase.length; j++){
+			for(var j = 0; j < livingCase.length; j++){
 				if(livingCase[j].case_id == tmpFrameList.edge_case[i].case_id){
 					edge_count[tmpFrameList.edge_case[i].from][tmpFrameList.edge_case[i].to]--;
 					livingCase.splice(j,1);	//删除第j个元素往后1个
@@ -924,7 +923,8 @@ $("#play").click(function() {
 });
 
 $("#playSpeed").change(function() {
-	playTime = maxTime - (maxTime-minTime) / 100 * ($("#playSpeed").val());
+	s = maxTime / minTime;
+	playTime = maxTime / (s /(100/ ($("#playSpeed").val()))) ;
 	time = frameToTime(frame);
 	repaint();
 });
