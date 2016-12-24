@@ -439,7 +439,7 @@ function paint()
 		.attr("rx", 5)
 		.attr("fill", function(d,i){
 			if(i==0 || i==1)
-				return "#706f6f";
+				return "#cccccc";
 			else
 				return "#3399ff";
 		})
@@ -497,17 +497,12 @@ function paint()
 	}
 }
 
-//二次贝塞尔曲线点计算
 function calQuadraticBezierCurve(p0, p1, p2, t){
 	if(t > 1 || t < 0){
 		console.log("invalid t in calQuadraticBezierCurve!")
 		return;
 	}
 	return (1-t) * (1-t) * p0 + 2 * t * (1-t) * p1 + t * t * p2;
-}
-
-function calCasePercentInPath(from, to, begin, end){
-
 }
 
 function repaint()
@@ -706,151 +701,10 @@ function fixChartHeight()
 	$("#chart").height($("#chart").height() - (t - $("#aside").height()));
 }
 
-function init()
-{
-	$("#loading").modal("toggle");
-	d3.json("backend/graphNet.json", function (error, data) {
-			var zoom = d3.behavior.zoom()
-				.scaleExtent([0.1, 10])
-				.on("zoom", function() {
-					svgContainer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
-				});
-			d3.select("#svg").call(zoom);
-			svgContainer = d3.select("#svg").append("g");
-			svgContainer.append("defs").append("marker")
-				.attr("id","arrow")
-				.attr("markerUnits","userSpaceOnUse") //strokeWidth
-				.attr("markerWidth","12")
-				.attr("markerHeight","12")
-				.attr("viewBox","0 0 12 12") 
-				//.attr("refX","10")
-				.attr("refX","6")
-				.attr("refY","6")
-				.attr("orient","auto")
-				.append("path")
-				.attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
-				.attr("fill", "#d5d6d6");
-			svgContainer.append("defs").append("marker")
-				.attr("id","arrow2")
-				.attr("markerUnits","userSpaceOnUse")
-				.attr("markerWidth","12")
-				.attr("markerHeight","12")
-				.attr("viewBox","0 0 12 12") 
-				.attr("refX","6")
-				.attr("refY","6")
-				.attr("orient","auto")
-				.append("path")
-				.attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
-				.attr("fill", "#ffc0cb");
-			graph = data;
-			activityNum = graph["activity_name"].length;
-			edgeWeights = {};
-			subGraph = {};
-			topoLayout = {};
-			layout = {};
-			pathLayout = {};
-			$("#main").height($(window).height() - 20);
-			$("#aside").height($(window).height() - 20);
-			svgWidth = $("#svg").width();
-			svgHeight = $("#svg").height();
-			setEdgeType();
-			setThreshold();
-			calcTopoLayout();
-			calcLayout();
-			paint();
-			activitySelected = 0;
-			pathSelected = {"x": -1, "y": -1};
-			showProperty();
-			fixChartHeight();
-			setChart();
-			$(window).resize(function() {
-				resize();
-				calcPathLayout();
-				repaint();
-			});
-			$("#edgetype").change(function() {
-				setEdgeType();
-				setThreshold();
-				calcTopoLayout();
-				calcLayout();
-				repaint();
-				setChart();
-				resetProperty();
-				});
-			$("#threshold").change(function() {
-				setThreshold();
-				calcTopoLayout();
-				calcLayout();
-				repaint();
-				resetProperty();
-			});
-			$("#resize").click(function() {
-				svgContainer.attr("transform", "");
-				zoom.translate([0, 0]);
-				zoom.scale(1);
-			});
-			$("#property-value-2").bind("keypress", function (e) {
-				if (e.keyCode == "13")
-				{
-					if (activitySelected > -1)
-					{
-						graph["activity_name"][activitySelected] = $("#property-value-2").val();
-					}
-					else
-					{
-						graph[edgeType][pathSelected.x][pathSelected.y] = parseInt($("#property-value-2").val(), 10);
-						calcTopoLayout();
-						calcLayout();
-						repaint();
-						resetProperty();
-					}
-				}
-			});
-
-
-			d3.json("backend/animation.json", function (error, data) {
-				animationJson = data;
-
-				time = 0;		//当前时刻
-				period = 30;	//刷新率
-				minTime = 120000;										// 播放最短时长
-				maxTime = (animationJson.end - animationJson.begin);	// 播放最长时长为原数据总时长
-
-				s = maxTime / minTime;
-				playTime = maxTime / (s / (100 / ($("#playSpeed").val()))) ;
-
-				frame = animationJson.begin;	//当前帧数
-
-				activity_count = [];			//维护activity的数量
-				edge_count = [];				//维护edge的数量
-				for(var i = 0; i < activityNum; i++){
-					activity_count[i] = 0;
-					edge_count.push([]);
-					for(var j =0; j < activityNum; j++){
-						edge_count[i][j] = 0;
-					}
-				}
-
-				livingCase = [];				//维护需要显示的case数组
-				frameListIndex = 0;				//frameList的当前索引
-
-				activityColorScale = d3.scale.linear()
-					.domain([0, 5])
-					.range(["#3399ff", "#3b5998"]);
-
-				$("#position").val(0);
-				$("#playSpeed").val(50);
-
-				$("#loading").modal("toggle");
-			});
-
-	});
-
-}
-
 function frameToTime(frame){
 	return parseInt((frame - animationJson.begin) / (animationJson.end - animationJson.begin) * playTime);
 }
+
 function timeToFrame(time){
 	return parseInt(time / playTime * (animationJson.end - animationJson.begin) + animationJson.begin);
 }
@@ -1006,55 +860,195 @@ function setPosition()
 	}
 }
 
-$("#playSpeed").change(function() {
-	s = maxTime / minTime;
-	playTime = maxTime / (s /(100/ ($("#playSpeed").val()))) ;
-	time = frameToTime(frame);
-	repaint();
-});
+function init()
+{
+	$("#loading").modal("toggle");
+	d3.json("backend/graphNet.json", function (error, data) {
+			var zoom = d3.behavior.zoom()
+				.scaleExtent([0.1, 10])
+				.on("zoom", function() {
+					svgContainer.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+				});
+			d3.select("#svg").call(zoom);
+			svgContainer = d3.select("#svg").append("g");
+			svgContainer.append("defs").append("marker")
+				.attr("id","arrow")
+				.attr("markerUnits","userSpaceOnUse") //strokeWidth
+				.attr("markerWidth","12")
+				.attr("markerHeight","12")
+				.attr("viewBox","0 0 12 12") 
+				//.attr("refX","10")
+				.attr("refX","6")
+				.attr("refY","6")
+				.attr("orient","auto")
+				.append("path")
+				.attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
+				.attr("fill", "#d5d6d6");
+			svgContainer.append("defs").append("marker")
+				.attr("id","arrow2")
+				.attr("markerUnits","userSpaceOnUse")
+				.attr("markerWidth","12")
+				.attr("markerHeight","12")
+				.attr("viewBox","0 0 12 12") 
+				.attr("refX","6")
+				.attr("refY","6")
+				.attr("orient","auto")
+				.append("path")
+				.attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
+				.attr("fill", "#ffc0cb");
+			graph = data;
+			activityNum = graph["activity_name"].length;
+			edgeWeights = {};
+			subGraph = {};
+			topoLayout = {};
+			layout = {};
+			pathLayout = {};
+			$("#main").height($(window).height() - 20);
+			$("#aside").height($(window).height() - 20);
+			svgWidth = $("#svg").width();
+			svgHeight = $("#svg").height();
+			setEdgeType();
+			setThreshold();
+			calcTopoLayout();
+			calcLayout();
+			paint();
+			activitySelected = 0;
+			pathSelected = {"x": -1, "y": -1};
+			showProperty();
+			fixChartHeight();
+			setChart();
+			$(window).resize(function() {
+				resize();
+				calcPathLayout();
+				repaint();
+			});
+			$("#edgetype").change(function() {
+				setEdgeType();
+				setThreshold();
+				calcTopoLayout();
+				calcLayout();
+				repaint();
+				setChart();
+				resetProperty();
+				});
+			$("#threshold").change(function() {
+				setThreshold();
+				calcTopoLayout();
+				calcLayout();
+				repaint();
+				resetProperty();
+			});
+			$("#resize").click(function() {
+				svgContainer.attr("transform", "");
+				zoom.translate([0, 0]);
+				zoom.scale(1);
+			});
+			$("#property-value-2").bind("keypress", function (e) {
+				if (e.keyCode == "13")
+				{
+					if (activitySelected > -1)
+					{
+						graph["activity_name"][activitySelected] = $("#property-value-2").val();
+					}
+					else
+					{
+						graph[edgeType][pathSelected.x][pathSelected.y] = parseInt($("#property-value-2").val(), 10);
+						calcTopoLayout();
+						calcLayout();
+						repaint();
+						resetProperty();
+					}
+				}
+			});
 
-$("#position").change(function() {
-	setPosition();
-	repaint();
-});
 
-$("#play").click(function() {
-	if($("#play span").attr("class") == "glyphicon glyphicon-play"){		// 执行暂停
-		$("#play span").attr("class", "glyphicon glyphicon-pause");
-		playFlag = false;
-		updateInterval = setInterval(update,period);
-	}
-	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){	// 执行播放
-		$("#play span").attr("class", "glyphicon glyphicon-play");
-		playFlag = true;
-		clearInterval(updateInterval);
-	}
-});
+			d3.json("backend/animation.json", function (error, data) {
 
-mousedownPosition = false;
-playFlag = false; 				// 用于拖动进度条响应判断
-$("#position").mousedown(function (){
-    mousedownPosition = true;
-    playFlag = false;
-	clearInterval(updateInterval);
-	setPosition();
-  	repaint();
-});
-$("#position").mouseup(function (){
-	mousedownPosition = false;
-	if(playFlag == false && ($("#play span").attr("class") == "glyphicon glyphicon-pause")){
-		updateInterval = setInterval(update,period);	//在暂停时候松开才有效
-		playFlag = true;
-	}
-});
-$("#position").mousemove(function (){
-	if(mousedownPosition){
-  		setPosition();
-  		repaint();
-	}
-});
+				animationJson = data;
 
+				time = 0;		//当前时刻
+				period = 30;	//刷新率
+				minTime = 120000;										// 播放最短时长
+				maxTime = (animationJson.end - animationJson.begin);	// 播放最长时长为原数据总时长
 
+				s = maxTime / minTime;
+				playTime = maxTime / (s / (100 / ($("#playSpeed").val()))) ;
 
+				frame = animationJson.begin;	//当前帧数
+
+				activity_count = [];			//维护activity的数量
+				edge_count = [];				//维护edge的数量
+
+				mousedownPosition = false;
+				playFlag = false; 				// 用于拖动进度条响应判断
+
+				for(var i = 0; i < activityNum; i++){
+					activity_count[i] = 0;
+					edge_count.push([]);
+					for(var j =0; j < activityNum; j++){
+						edge_count[i][j] = 0;
+					}
+				}
+
+				livingCase = [];				//维护需要显示的case数组
+				frameListIndex = 0;				//frameList的当前索引
+
+				activityColorScale = d3.scale.linear()
+					.domain([0, 5])
+					.range(["#3399ff", "#3b5998"]);
+
+				$("#position").val(0);
+				$("#playSpeed").val(50);
+
+				$("#loading").modal("toggle");
+
+				$("#playSpeed").change(function() {
+					s = maxTime / minTime;
+					playTime = maxTime / (s /(100/ ($("#playSpeed").val()))) ;
+					time = frameToTime(frame);
+					repaint();
+				});
+
+				$("#position").change(function() {
+					setPosition();
+					repaint();
+				});
+
+				$("#play").click(function() {
+					if($("#play span").attr("class") == "glyphicon glyphicon-play"){		// 执行暂停
+						$("#play span").attr("class", "glyphicon glyphicon-pause");
+						playFlag = false;
+						updateInterval = setInterval(update,period);
+					}
+					else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){	// 执行播放
+						$("#play span").attr("class", "glyphicon glyphicon-play");
+						playFlag = true;
+						clearInterval(updateInterval);
+					}
+				});
+
+				$("#position").mousedown(function (){
+				    mousedownPosition = true;
+				    playFlag = false;
+					clearInterval(updateInterval);
+					setPosition();
+				  	repaint();
+				});
+				$("#position").mouseup(function (){
+					mousedownPosition = false;
+					if(playFlag == false && ($("#play span").attr("class") == "glyphicon glyphicon-pause")){
+						updateInterval = setInterval(update,period);	//在暂停时候松开才有效
+						playFlag = true;
+					}
+				});
+				$("#position").mousemove(function (){
+					if(mousedownPosition){
+				  		setPosition();
+				  		repaint();
+					}
+				});
+			});
+	});
+}
 
 $(document).ready(init);
