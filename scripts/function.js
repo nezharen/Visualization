@@ -307,7 +307,7 @@ function calcPathLayout()
 							{
 								var ddtx = tx - (layout[edgeType][p].x + rectWidth / 2);
 								var ddty = ty - (layout[edgeType][p].y + rectHeight / 2);
-								if (i == 7 && j == 0 && p == 6 && k == 1)
+								if (i == 6 && j == 1 && p == 7 && k == 1)
 									console.log("ddtx=" + ddtx + " " + "ddty=" + ddty + "deg=" + (ddtx * dx + ddty * dy) / Math.sqrt(ddtx * ddtx + ddty * ddty) / Math.sqrt(dx * dx + dy * dy));
 								if (Math.abs((ddtx * dx + ddty * dy) / Math.sqrt(ddtx * ddtx + ddty * ddty) / Math.sqrt(dx * dx + dy * dy)) > t)
 								{
@@ -319,24 +319,24 @@ function calcPathLayout()
 										ddtx = -ddtx;
 										ddty = -ddty;
 									}
-									if (i == 7 && j == 0 && p == 6 && k == 1)
+									if (i == 6 && j == 1 && p == 7 && k == 1)
 										console.log("swap");
 								}
 								var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
-								if (i == 7 && j == 0 && p == 6 && k == 1)
+								if (i == 6 && j == 1 && p == 7 && k == 1)
 									console.log("dis=" + dis);
-								ddtx *= 100000 / (dis * dis * dis);
-								ddty *= 100000 /(dis * dis * dis);
+								ddtx *= 15000 / (dis * dis);
+								ddty *= 15000 /(dis * dis);
 								if (Math.abs(ddtx) > Math.min(minSpaceWidth, svgWidth / 10))
 									ddtx = ddtx / Math.abs(ddtx) * Math.min(minSpaceWidth, svgWidth / 10);
 								if (Math.abs(ddty) > Math.min(minSpaceWidth, svgHeight / 10))
 									ddty = ddty / Math.abs(ddty) * Math.min(minSpaceWidth, svgHeight / 10);
 								dtx += ddtx;
 								dty += ddty;
-								if (i == 7 && j == 0 && p == 6 && k == 1)
+								if (i == 6 && j == 1 && p == 7 && k == 1)
 									console.log("ddtx=" + ddtx + " " + "ddty=" + ddty);
 							}
-						if (i == 7 && j == 0 && k == 1)
+						if (i == 6 && j == 1 && k == 7)
 							console.log("dtx=" + dtx + " " + "dty=" + dty);
 						tx += dtx;
 						ty += dty;
@@ -384,14 +384,6 @@ var lineFunction = function(d) {
 		else
 			s += " Q " + d[i - 1].x + " " + d[i - 1].y + " " + d[i].x + " " + d[i].y;
 	return s;
-};
-
-var lineFunction2 = function(d) {
-	if(d.length == 3)
-		return ("M" + d[0].x + " " + d[0].y + " Q " + d[2].x + " " + d[2].y + ", " + d[1].x + " " + d[1].y);
-		//return ("M" + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
-	else 
-		return "";
 };
 
 function paint()
@@ -878,8 +870,6 @@ function updateCase(){
 	}
 }
 
-$(document).ready(init);
-
 function update(){
 	if(time >= playTime){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
@@ -902,8 +892,6 @@ function update(){
 	//console.log(time,$("#position").val());
 	time += period;
 }
-
-
 
 function setPosition()
 {
@@ -993,3 +981,5 @@ $("#position").mousemove(function (){
 $("path").mousemove(function (){
 	
 });
+
+$(document).ready(init);
