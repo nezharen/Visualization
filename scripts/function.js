@@ -508,16 +508,16 @@ function repaint()
 	// update
 	caseCircle
 			.style("stroke","yellow")
-		    .style("fill","red")
-		    .attr("display", function(d){
-		    	if(d.from == undefined)
+			.style("fill","red")
+			.attr("display", function(d){
+				if(d.from == undefined)
 					return "none";
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
 					return "none";
 				return true;
-		    })
-		    .attr("cx", function(d){
-		    	if(d.from == undefined)
+			})
+			.attr("cx", function(d){
+				if(d.from == undefined)
 					return;
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
 					return;
@@ -539,7 +539,7 @@ function repaint()
 				}
 			})
 			.attr("cy", function(d){
-		    	if(d.from == undefined)
+				if(d.from == undefined)
 					return;
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
 					return;
@@ -560,7 +560,7 @@ function repaint()
 						return calQuadraticBezierCurve(y2, pathLayout[edgeType][from][to][3].y, pathLayout[edgeType][from][to][4].y, (t-0.5)*2);
 				}
 			})
-	    	.attr("r","4");
+			.attr("r","4");
 	// exit
 	caseCircle
 		.exit()
@@ -759,17 +759,22 @@ function init()
 				livingCase = [];				//维护需要显示的case数组
 				frameListIndex = 0;				//frameList的当前索引
 
+				//activityColorScale = d3.scale.linear()
 				activityColorScale = d3.scale.linear()
-			        .domain([0, 50])
-			        .range(["#add8e6", "blue"]);
+					.domain([0, 5])
+					.range(["#add8e6", "blue"]);
+				// activityColorScale = d3.scale.threshold()
+				// 	.domain([1, 10,50])
+				// 	.range(["white","#add8e6", "blue","black"]);
 			    edgeColorScale = d3.scale.linear()
-			        .domain([0, 50])
-			        .range(["#f2cbbc", "red"]);
+					.domain([0, 50])
+					.range(["#f2cbbc", "red"]);
 			    edgeWidthScale = d3.scale.linear()
-			        .domain([0, 50])
-			        .range([1, 2]);
+					.domain([0, 50])
+					.range([4, 4]);
 
 				$("#position").val(0);
+				$("#playSpeed").val(50);
 
 				$("#loading").modal("toggle");
 			});
@@ -875,8 +880,13 @@ function update(){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
 		time = 0;
 		frameListIndex = 0;
+		livingCase = [];
 	    clearInterval(updateInterval);
 	    console.log("clear");
+	    
+		$("#position").val(time / playTime * 100);
+		repaint();
+		return;
 	}
 	frame = timeToFrame(time);
 
