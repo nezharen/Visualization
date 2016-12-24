@@ -442,7 +442,16 @@ function paint()
 				return "#706f6f";
 			else
 				return "#3399ff";
-		});
+		})
+		.on("mouseover", function(d, i) { 
+			d3.select(this)
+                .attr("stroke-width",2.5); 
+        })
+        .on("mouseout", function(d, i) { 
+			d3.select(this)
+                .attr("stroke-width",1); 
+        })
+		;
 	activityTexts = activityContainers.append("text")
 		.attr("x", 10)
 		.attr("y", rectHeight / 2)
@@ -475,6 +484,14 @@ function paint()
 					else
 						return "url(#arrow2)";
 				})
+				.on("mouseover", function(d, i) { 
+					d3.select(this)
+		                .attr("stroke-width",3.5); 
+		        })
+		        .on("mouseout", function(d, i) { 
+					d3.select(this)
+		                .attr("stroke-width",1); 
+		        })
 				.call(pathDrag);
 		}
 	}
@@ -1029,8 +1046,7 @@ $("#position").mousemove(function (){
 	}
 });
 
-$("path").mousemove(function (){
-	
-});
+
+
 
 $(document).ready(init);
