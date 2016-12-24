@@ -646,7 +646,7 @@ function fixChartHeight()
 function init()
 {
 	$("#loading").modal("toggle");
-	d3.json("data/graphNet.json", function (error, data) {
+	d3.json("backend/graphNet.json", function (error, data) {
 			var zoom = d3.behavior.zoom()
 				.scaleExtent([0.1, 10])
 				.on("zoom", function() {
