@@ -435,9 +435,14 @@ function paint()
 		.attr("width", rectWidth)
 		.attr("height", rectHeight)
 		.attr("stroke", "black")
-		.attr("stroke-width", 2)
+		.attr("stroke-width", 1)
 		.attr("rx", 5)
-		.attr("fill", "#4d97d6");
+		.attr("fill", function(d,i){
+			if(i==0 || i==1)
+				return "#706f6f";
+			else
+				return "#3399ff";
+		});
 	activityTexts = activityContainers.append("text")
 		.attr("x", 10)
 		.attr("y", rectHeight / 2)
@@ -456,10 +461,20 @@ function paint()
 			edgePaths[i][j] = svgContainer.append("path")
 				.data([{"x": i, "y": j}])
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
-				.attr("stroke", "black")
-				.attr("stroke-width", 2)
+				.attr("stroke",function(){
+					if(i == 0 || i == 1 || j == 0 || j == 1)
+						return "#d5d6d6";
+					else
+						return "#ffc0cb";
+				})
+				.attr("stroke-width", 1)
 				.attr("fill", "none")
-				.attr("marker-end","url(#arrow)")
+				.attr("marker-end",function(){
+					if(i == 0 || i == 1 || j == 0 || j == 1)
+						return "url(#arrow)";
+					else
+						return "url(#arrow2)";
+				})
 				.call(pathDrag);
 		}
 	}
@@ -485,17 +500,30 @@ function repaint()
 		.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
 	activityRects
 		.data(activity_count)
-		.attr("fill", function(d){ return activityColorScale(d);})
+		.attr("fill", function(d,i){
+			if(i==0 || i==1)
+				return "#706f6f";
+			else if(d > 5)
+				return activityColorScale(5);
+			else
+				return activityColorScale(d);
+		})
 		.attr("width", rectWidth)
 		.attr("height", rectHeight);
 	activityTexts
 		.attr("y", rectHeight / 2);
-	for (var i = 0; i < activityNum; i++)
-		for (var j = 0; j < activityNum; j++)
+	for (var i = 0; i < activityNum; i++){
+		for (var j = 0; j < activityNum; j++){
 			edgePaths[i][j]
 				.attr("d", lineFunction(pathLayout[edgeType][i][j]))
-				.attr("stroke", edgeColorScale(edge_count[i][j]))
-				.attr("stroke-width", edgeWidthScale(edge_count[i][j]))
+				.attr("stroke", function(){
+					if(i == 0 || i == 1 || j == 0 || j == 1)
+						return "#d5d6d6";
+					else
+						return "#ffc0cb";
+				})
+		}
+	}
 
 	caseCircle = svgContainer.selectAll("circle.caseCircle")
 		.data(livingCase);
@@ -507,8 +535,18 @@ function repaint()
 			.attr("class","caseCircle")
 	// update
 	caseCircle
-			.style("stroke","yellow")
-			.style("fill","red")
+			.style("stroke",function(d,i){
+				if(d.from == 0 || d.from == 1 || d.to == 0 || d.to == 1)
+					return "#808080";
+				else
+					return "#fff68f";
+			})
+			.style("fill", function(d,i){
+				if(d.from == 0 || d.from == 1 || d.to == 0 || d.to == 1)
+					return "white";
+				else
+					return "#fe3500";
+			})
 			.attr("display", function(d){
 				if(d.from == undefined)
 					return "none";
@@ -666,7 +704,19 @@ function init()
 				.attr("orient","auto")
 				.append("path")
 				.attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
-				.attr("fill", "black");
+				.attr("fill", "#d5d6d6");
+			svgContainer.append("defs").append("marker")
+				.attr("id","arrow2")
+				.attr("markerUnits","userSpaceOnUse")
+				.attr("markerWidth","12")
+				.attr("markerHeight","12")
+				.attr("viewBox","0 0 12 12") 
+				.attr("refX","6")
+				.attr("refY","6")
+				.attr("orient","auto")
+				.append("path")
+				.attr("d", "M2,2 L10,6 L2,10 L6,6 L2,2")
+				.attr("fill", "#ffc0cb");
 			graph = data;
 			activityNum = graph["activity_name"].length;
 			edgeWeights = {};
@@ -742,7 +792,7 @@ function init()
 				maxTime = (animationJson.end - animationJson.begin);	// 播放最长时长为原数据总时长
 
 				s = maxTime / minTime;
-				playTime = maxTime / (s /(100/ ($("#playSpeed").val()))) ;
+				playTime = maxTime / (s / (100 / ($("#playSpeed").val()))) ;
 
 				frame = animationJson.begin;	//当前帧数
 
@@ -759,25 +809,16 @@ function init()
 				livingCase = [];				//维护需要显示的case数组
 				frameListIndex = 0;				//frameList的当前索引
 
-				//activityColorScale = d3.scale.linear()
 				activityColorScale = d3.scale.linear()
 					.domain([0, 5])
-					.range(["#add8e6", "blue"]);
-				// activityColorScale = d3.scale.threshold()
-				// 	.domain([1, 10,50])
-				// 	.range(["white","#add8e6", "blue","black"]);
-			    edgeColorScale = d3.scale.linear()
-					.domain([0, 50])
-					.range(["#f2cbbc", "red"]);
-			    edgeWidthScale = d3.scale.linear()
-					.domain([0, 50])
-					.range([4, 4]);
+					.range(["#3399ff", "#3b5998"]);
 
 				$("#position").val(0);
 				$("#playSpeed").val(50);
 
 				$("#loading").modal("toggle");
 			});
+
 	});
 
 }
