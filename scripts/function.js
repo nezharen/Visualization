@@ -325,8 +325,8 @@ function calcPathLayout()
 								var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
 								if (i == 6 && j == 1 && p == 7 && k == 1)
 									console.log("dis=" + dis);
-								ddtx *= 15000 / (dis * dis);
-								ddty *= 15000 /(dis * dis);
+								ddtx *= 5000 / (dis * dis);
+								ddty *= 5000 /(dis * dis);
 								if (Math.abs(ddtx) > Math.min(minSpaceWidth, svgWidth / 10))
 									ddtx = ddtx / Math.abs(ddtx) * Math.min(minSpaceWidth, svgWidth / 10);
 								if (Math.abs(ddty) > Math.min(minSpaceWidth, svgHeight / 10))
