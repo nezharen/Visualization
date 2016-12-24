@@ -957,24 +957,31 @@ $("#position").change(function() {
 $("#play").click(function() {
 	if($("#play span").attr("class") == "glyphicon glyphicon-play"){
 		$("#play span").attr("class", "glyphicon glyphicon-pause");
+		playFlag = true;
 		updateInterval = setInterval(update,period);
 	}
 	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){
 		$("#play span").attr("class", "glyphicon glyphicon-play");
+		playFlag = false;
 		clearInterval(updateInterval);
 	}
 });
 
 mousedownPosition = false;
+playFlag = false; 				// 用于拖动进度条响应判断
 $("#position").mousedown(function (){
     mousedownPosition = true;
+    playFlag = false;
 	clearInterval(updateInterval);
 	setPosition();
   	repaint();
 });
 $("#position").mouseup(function (){
 	mousedownPosition = false;
-	updateInterval = setInterval(update,period);
+	if(playFlag == false){
+		updateInterval = setInterval(update,period);				//在暂停时候松开才有效
+		playFlag = true;
+	}
 });
 $("#position").mousemove(function (){
 	if(mousedownPosition){
