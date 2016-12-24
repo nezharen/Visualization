@@ -519,7 +519,7 @@ function repaint()
 		.data(activity_count)
 		.attr("fill", function(d,i){
 			if(i==0 || i==1)
-				return "#706f6f";
+				return "#cccccc";
 			else if(d > 5)
 				return activityColorScale(5);
 			else
@@ -537,7 +537,7 @@ function repaint()
 					if(i == 0 || i == 1 || j == 0 || j == 1)
 						return "#d5d6d6";
 					else
-						return "#ffc0cb";
+						return "#ffb6c1";
 				})
 		}
 	}
@@ -552,17 +552,17 @@ function repaint()
 			.attr("class","caseCircle")
 	// update
 	caseCircle
-			.style("stroke",function(d,i){
+			.style("stroke",function(d,i){	//边框
 				if(d.from == 0 || d.from == 1 || d.to == 0 || d.to == 1)
 					return "#808080";
 				else
-					return "#fff68f";
+					return "red";//"#f08080";//"#fff68f";
 			})
 			.style("fill", function(d,i){
 				if(d.from == 0 || d.from == 1 || d.to == 0 || d.to == 1)
 					return "white";
 				else
-					return "#fe3500";
+					return "#fa8072";//"#fe3500";
 			})
 			.attr("display", function(d){
 				if(d.from == undefined)
