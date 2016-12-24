@@ -953,14 +953,14 @@ $("#position").change(function() {
 });
 
 $("#play").click(function() {
-	if($("#play span").attr("class") == "glyphicon glyphicon-play"){
+	if($("#play span").attr("class") == "glyphicon glyphicon-play"){		// 执行暂停
 		$("#play span").attr("class", "glyphicon glyphicon-pause");
-		playFlag = true;
+		playFlag = false;
 		updateInterval = setInterval(update,period);
 	}
-	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){
+	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){	// 执行播放
 		$("#play span").attr("class", "glyphicon glyphicon-play");
-		playFlag = false;
+		playFlag = true;
 		clearInterval(updateInterval);
 	}
 });
@@ -976,8 +976,8 @@ $("#position").mousedown(function (){
 });
 $("#position").mouseup(function (){
 	mousedownPosition = false;
-	if(playFlag == false){
-		updateInterval = setInterval(update,period);				//在暂停时候松开才有效
+	if(playFlag == false && ($("#play span").attr("class") == "glyphicon glyphicon-pause")){
+		updateInterval = setInterval(update,period);	//在暂停时候松开才有效
 		playFlag = true;
 	}
 });
