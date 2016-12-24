@@ -683,11 +683,11 @@ function init()
 			calcTopoLayout();
 			calcLayout();
 			paint();
-			setChart();
 			activitySelected = 0;
 			pathSelected = {"x": -1, "y": -1};
 			showProperty();
 			fixChartHeight();
+			setChart();
 			$(window).resize(function() {
 				resize();
 				calcPathLayout();
