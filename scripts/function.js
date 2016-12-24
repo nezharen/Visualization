@@ -292,7 +292,7 @@ function calcPathLayout()
 								}
 							}
 					pathLayout[edgeType][i][j].push(start);
-					var controlNum = 3;//must be odd
+					var controlNum = 1;//must be odd
 					dx = (end.x - start.x) / (controlNum + 1);
 					dy = (end.y - start.y) / (controlNum + 1);
 					t = Math.sqrt(2) / 2;
@@ -387,8 +387,8 @@ var lineFunction = function(d) {
 };
 
 var lineFunction2 = function(d) {
-	if(d.length == 5)
-		return ("M" + d[0].x + " " + d[0].y + " Q " + d[2].x + " " + d[2].y + ", " + d[4].x + " " + d[4].y);
+	if(d.length == 3)
+		return ("M" + d[0].x + " " + d[0].y + " Q " + d[2].x + " " + d[2].y + ", " + d[1].x + " " + d[1].y);
 		//return ("M" + d[0].x + " " + d[0].y + " L " + d[4].x + " " + d[4].y  );
 	else 
 		return "";
@@ -473,6 +473,19 @@ function paint()
 	}
 }
 
+//二次贝塞尔曲线点计算
+function calQuadraticBezierCurve(p0, p1, p2, t){
+	if(t > 1 || t < 0){
+		console.log("invalid t in calQuadraticBezierCurve!")
+		return;
+	}
+	return (1-t) * (1-t) * p0 + 2 * t * (1-t) * p1 + t * t * p2;
+}
+
+function calCasePercentInPath(from, to, begin, end){
+
+}
+
 function repaint()
 {
 	activityContainers
@@ -516,30 +529,45 @@ function repaint()
 					return;
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
 					return;
-		    	var from = d.from;
+				var from = d.from;
 				var to = d.to;
 				var begin = d.begin;
 				var end = d.end;
-				x1 = pathLayout[edgeType][from][to][0].x;
-				x2 = pathLayout[edgeType][from][to][4].x;
-				rate = (frame - begin) / (end - begin);
-				return rate * (x2 - x1) + x1;
-		    })
-		    .attr("cy", function(d){
+				var t = (frame - begin) / (end - begin);
+				var x0 = pathLayout[edgeType][from][to][0].x;
+				var x1 = pathLayout[edgeType][from][to][1].x;
+				var x2 = pathLayout[edgeType][from][to][2].x;
+				if(from != to)
+					return calQuadraticBezierCurve(x0, x1, x2, t);
+				else{
+					if(t <= 0.5)
+						return calQuadraticBezierCurve(x0, x1, x2, 2 * t);
+					else
+						return calQuadraticBezierCurve(x2, pathLayout[edgeType][from][to][3].x, pathLayout[edgeType][from][to][4].x, (t-0.5)*2);
+				}
+			})
+			.attr("cy", function(d){
 		    	if(d.from == undefined)
 					return;
 				if(pathLayout[edgeType][d.from][d.to].length == 0)	//该边不存在
 					return;
-		    	var from = d.from;
+				var from = d.from;
 				var to = d.to;
 				var begin = d.begin;
 				var end = d.end;
-				y1 = pathLayout[edgeType][from][to][0].y;
-				y2 = pathLayout[edgeType][from][to][4].y;
-				rate = (frame - begin) / (end - begin);
-				//console.log(from,to,begin,end,rate);
-				return rate * (y2 - y1) + y1;
-		    })
+				var t = (frame - begin) / (end - begin);
+				var y0 = pathLayout[edgeType][from][to][0].y;
+				var y1 = pathLayout[edgeType][from][to][1].y;
+				var y2 = pathLayout[edgeType][from][to][2].y;
+				if(from != to)
+					return calQuadraticBezierCurve(y0, y1, y2, t);
+				else{
+					if(t <= 0.5)
+						return calQuadraticBezierCurve(y0, y1, y2, 2 * t);
+					else
+						return calQuadraticBezierCurve(y2, pathLayout[edgeType][from][to][3].y, pathLayout[edgeType][from][to][4].y, (t-0.5)*2);
+				}
+			})
 	    	.attr("r","4");
 	// exit
 	caseCircle
@@ -636,10 +664,11 @@ function init()
 			svgContainer = d3.select("#svg").append("g");
 			svgContainer.append("defs").append("marker")
 				.attr("id","arrow")
-				.attr("markerUnits","strokeWidth")
+				.attr("markerUnits","userSpaceOnUse") //strokeWidth
 				.attr("markerWidth","12")
 				.attr("markerHeight","12")
 				.attr("viewBox","0 0 12 12") 
+				//.attr("refX","10")
 				.attr("refX","6")
 				.attr("refY","6")
 				.attr("orient","auto")
@@ -834,7 +863,7 @@ function updateCase(){
 	}
 	// 最后删掉因为时间冲突之前未删除的(如果预处理数据没有时间为0的activity或edge则不会执行)
 	for(var i = 0; i < toBeDeletedCase.length; i++){
-		console.log("time conflict! " + toBeDeletedCase[i]);
+		//console.log("time conflict! " + toBeDeletedCase[i]);
 		for(var j = livingCase.length - 1; j > 0; j--){
 			if(livingCase[j].case_id == toBeDeletedCase[i]){
 				if(livingCase[j].index != undefined){
@@ -928,7 +957,6 @@ $("#position").change(function() {
 $("#play").click(function() {
 	if($("#play span").attr("class") == "glyphicon glyphicon-play"){
 		$("#play span").attr("class", "glyphicon glyphicon-pause");
-		//setPosition();	//通过进度条判断，不存储time等变量
 		updateInterval = setInterval(update,period);
 	}
 	else if($("#play span").attr("class") == "glyphicon glyphicon-pause"){
@@ -953,4 +981,8 @@ $("#position").mousemove(function (){
   		setPosition();
   		repaint();
 	}
+});
+
+$("path").mousemove(function (){
+	
 });
