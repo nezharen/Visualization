@@ -307,8 +307,6 @@ function calcPathLayout()
 							{
 								var ddtx = tx - (layout[edgeType][p].x + rectWidth / 2);
 								var ddty = ty - (layout[edgeType][p].y + rectHeight / 2);
-								if (i == 6 && j == 1 && p == 7 && k == 1)
-									console.log("ddtx=" + ddtx + " " + "ddty=" + ddty + "deg=" + (ddtx * dx + ddty * dy) / Math.sqrt(ddtx * ddtx + ddty * ddty) / Math.sqrt(dx * dx + dy * dy));
 								if (Math.abs((ddtx * dx + ddty * dy) / Math.sqrt(ddtx * ddtx + ddty * ddty) / Math.sqrt(dx * dx + dy * dy)) > t)
 								{
 									var swaper = ddtx;
@@ -319,12 +317,8 @@ function calcPathLayout()
 										ddtx = -ddtx;
 										ddty = -ddty;
 									}
-									if (i == 6 && j == 1 && p == 7 && k == 1)
-										console.log("swap");
 								}
 								var dis = Math.sqrt(ddtx * ddtx + ddty * ddty);
-								if (i == 6 && j == 1 && p == 7 && k == 1)
-									console.log("dis=" + dis);
 								ddtx *= 5000 / (dis * dis);
 								ddty *= 5000 /(dis * dis);
 								if (Math.abs(ddtx) > Math.min(minSpaceWidth, svgWidth / 10))
@@ -333,11 +327,7 @@ function calcPathLayout()
 									ddty = ddty / Math.abs(ddty) * Math.min(minSpaceWidth, svgHeight / 10);
 								dtx += ddtx;
 								dty += ddty;
-								if (i == 6 && j == 1 && p == 7 && k == 1)
-									console.log("ddtx=" + ddtx + " " + "ddty=" + ddty);
 							}
-						if (i == 6 && j == 1 && k == 7)
-							console.log("dtx=" + dtx + " " + "dty=" + dty);
 						tx += dtx;
 						ty += dty;
 						pathLayout[edgeType][i][j].push({"x": tx, "y": ty});
@@ -499,7 +489,6 @@ function paint()
 
 function calQuadraticBezierCurve(p0, p1, p2, t){
 	if(t > 1 || t < 0){
-		console.log("invalid t in calQuadraticBezierCurve!")
 		return;
 	}
 	return (1-t) * (1-t) * p0 + 2 * t * (1-t) * p1 + t * t * p2;
@@ -709,17 +698,6 @@ function timeToFrame(time){
 	return parseInt(time / playTime * (animationJson.end - animationJson.begin) + animationJson.begin);
 }
 
-function testRepeatTime(){
-	for(var i = 0; i < animationJson.frame_list.length; i++){
-	   	for(var j = 0; j < animationJson.frame_list[i].activity_case.length; j++){
-	       	if(animationJson.frame_list[i].activity_case[j].begin == animationJson.frame_list[i].activity_case[j].end)
-	            console.log("activity + " + animationJson.frame_list[i].activity_case[j].case_id + "  +  " + animationJson.frame_list[i].frame);}
-	   	for(var j = 0; j < animationJson.frame_list[i].edge_case.length; j++){
-	       	if(animationJson.frame_list[i].edge_case[j].begin == animationJson.frame_list[i].edge_case[j].end)
-	            console.log("edge + " + animationJson.frame_list[i].edge_case[j].case_id + "  +  " + animationJson.frame_list[i].frame);}
-	}
-}
-
 // 维护livingCase数组
 function updateCase(){
 	var tmpFrameList = animationJson.frame_list[frameListIndex];	// 关键当前帧的所有内容
@@ -780,7 +758,6 @@ function updateCase(){
 	}
 	// 最后删掉因为时间冲突之前未删除的(如果预处理数据没有时间为0的activity或edge则不会执行)
 	for(var i = 0; i < toBeDeletedCase.length; i++){
-		//console.log("time conflict! " + toBeDeletedCase[i]);
 		for(var j = livingCase.length - 1; j > 0; j--){
 			if(livingCase[j].case_id == toBeDeletedCase[i]){
 				if(livingCase[j].index != undefined){
@@ -802,7 +779,6 @@ function update(){
 		frameListIndex = 0;
 		livingCase = [];
 	    clearInterval(updateInterval);
-	    console.log("clear");
 	    
 		$("#position").val(time / playTime * 100);
 		repaint();
@@ -819,7 +795,6 @@ function update(){
 	}
 	repaint();
 	$("#position").val(time / playTime * 100);
-	//console.log(time,$("#position").val());
 	time += period;
 }
 
