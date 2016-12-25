@@ -687,7 +687,7 @@ function setChart()
 			data: []
 		}]
 	};
-	for (var i = 0; i < activityNum; i++)
+	for (var i = 2; i < activityNum; i++)
 	{
 		options["xAxis"]["categories"].push(i);
 		options["series"][0]["data"].push(graph[$("#edgetype").val()][i]);
