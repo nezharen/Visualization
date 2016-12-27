@@ -839,6 +839,7 @@ function init()
 {
 	$("#loading").modal("toggle");
 	d3.json("backend/graphNet.json", function (error, data) {
+	//d3.json("https://raw.githubusercontent.com/nezharen/Visualization/master/backend/graphNet.json", function (error, data) {
 			var zoom = d3.behavior.zoom()
 				.scaleExtent([0.1, 10])
 				.on("zoom", function() {
@@ -935,17 +936,17 @@ function init()
 					}
 				}
 			});
-
-
 			d3.json("backend/animation.json", function (error, data) {
+			//d3.json("https://raw.githubusercontent.com/nezharen/Visualization/master/backend/animation.json", function (error, data) {
+			//d3.json("backend/animation.json", function (error, data) {
 
 				animationJson = data;
 
 				time = 0;		//当前时刻
 				period = 30;	//刷新率
-				minTime = 120000;										// 播放最短时长
+				minTime = 120000 * 10;										// 播放最短时长
 				maxTime = (animationJson.end - animationJson.begin);	// 播放最长时长为原数据总时长
-
+				minTime = maxTime / 100;
 				s = maxTime / minTime;
 				playTime = maxTime / (s / (100 / ($("#playSpeed").val()))) ;
 
