@@ -944,9 +944,9 @@ function init()
 
 				time = 0;		//当前时刻
 				period = 30;	//刷新率
-				minTime = 120000 * 10;										// 播放最短时长
+				minTime = 120000;										// 播放最短时长
 				maxTime = (animationJson.end - animationJson.begin);	// 播放最长时长为原数据总时长
-				minTime = maxTime / 100;
+				// minTime = maxTime / 100;
 				s = maxTime / minTime;
 				playTime = maxTime / (s / (100 / ($("#playSpeed").val()))) ;
 
