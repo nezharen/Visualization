@@ -3,26 +3,26 @@ package mining;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-//Í¼ÍêÕûĞÅÏ¢Àà
+//å›¾å®Œæ•´ä¿¡æ¯ç±»
 public class GraphNet {
 	HashMap<String, Integer> activityIDMap;
 	public String[] activityNames;
-	public int[][] activityQueFre; //±ßÆµÂÊ
+	public int[][] activityQueFre; //è¾¹é¢‘ç‡
 	public int[] activityFre;
-	public int[] activityCaseFre; //caseÆµÂÊ
-	public int[][] activityCaseQueFre; //±ßµÄcaseÆµÂÊ
-	public int[] maxActivityRep;  //×î´ó·´¸´
-	public long[] activityTime;    //»î¶¯Ê±¼ä
+	public int[] activityCaseFre; //caseé¢‘ç‡
+	public int[][] activityCaseQueFre; //è¾¹çš„caseé¢‘ç‡
+	public int[] maxActivityRep;  //æœ€å¤§åå¤
+	public long[] activityTime;    //æ´»åŠ¨æ—¶é—´
 	public long[][] activityQueTime; 
-	public long[] maxActivityTime;  //×î´ó»î¶¯Ê±¼ä
+	public long[] maxActivityTime;  //æœ€å¤§æ´»åŠ¨æ—¶é—´
 	public long[][] maxActivityQueTime;
 	public long[] minActivityTime;
 	public long[][] minActivityQueTime;
-	public int activityCount;   //»î¶¯Êı
+	public int activityCount;   //æ´»åŠ¨æ•°
 	public int maxActivityFre;
 	public int maxActivityQuiFre;
-	public long beginTime;   //Õû¸öÍ¼µÄ¿ªÊ¼Ê±¼ä
-	public long endTime; 	//Õû¸öÍ¼µÄ½áÊøÊ±¼ä
+	public long beginTime;   //æ•´ä¸ªå›¾çš„å¼€å§‹æ—¶é—´
+	public long endTime; 	//æ•´ä¸ªå›¾çš„ç»“æŸæ—¶é—´
 	public ArrayList<Integer> activityQueFreSort;  
 	
 
@@ -37,14 +37,14 @@ public class GraphNet {
 		endTime = 0;
 	}
 
-	//hashÅĞ¶Ï»î¶¯Êı
+	//hashåˆ¤æ–­æ´»åŠ¨æ•°
 	public boolean activityExist(String activityName) {
 		return activityIDMap.containsKey(activityName);
 
 	}
 
 	
-	//¸÷Àà»î¶¯²Ù×÷
+	//å„ç±»æ´»åŠ¨æ“ä½œ
 	public void addActivityFre(int pos) {
 		activityFre[pos]++;
 		if (activityFre[pos] > maxActivityFre) {
@@ -80,7 +80,7 @@ public class GraphNet {
 		activityQueTime[parent][children] += time;
 	}
 	
-	//·ÖÅä¶¯Ì¬ÄÚ´æ
+	//åˆ†é…åŠ¨æ€å†…å­˜
 	public void setMemory() {
 		activityNames = new String[activityCount];
 		activityQueFre = new int[activityCount][activityCount];

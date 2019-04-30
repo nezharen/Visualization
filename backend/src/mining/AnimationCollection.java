@@ -14,9 +14,9 @@ public class AnimationCollection {
 		
 	HashMap<String, Integer> activityIDMap;
 	public String[] activityNames;
-	public int activityCount;   //»î¶¯Êı
-	public long beginTime;   //Õû¸öÍ¼µÄ¿ªÊ¼Ê±¼ä
-	public long endTime; 	//Õû¸öÍ¼µÄ½áÊøÊ±¼ä
+	public int activityCount;   //æ´»åŠ¨æ•°
+	public long beginTime;   //æ•´ä¸ªå›¾çš„å¼€å§‹æ—¶é—´
+	public long endTime; 	//æ•´ä¸ªå›¾çš„ç»“æŸæ—¶é—´
 	public long[] animationFrame;
 	public Animation[] dragAnimation;
 
@@ -37,12 +37,12 @@ public class AnimationCollection {
 		return size;
 	}
 	
-	//hashÅĞ¶Ï»î¶¯Êı
+	//hashåˆ¤æ–­æ´»åŠ¨æ•°
 	public boolean activityExist(String activityName) {
 		return activityIDMap.containsKey(activityName);
 	}
 	
-	//¸÷Àà»î¶¯²Ù×÷
+	//å„ç±»æ´»åŠ¨æ“ä½œ
 	public void setActivityName(int id, String name) {
 		activityNames[id] = name;
 	}
@@ -56,7 +56,7 @@ public class AnimationCollection {
 		activityCount++;
 	}
 	
-	//·ÖÅä¶¯Ì¬ÄÚ´æ
+	//åˆ†é…åŠ¨æ€å†…å­˜
 	public void setMemory() {
 		activityNames = new String[activityCount];
 	}

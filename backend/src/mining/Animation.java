@@ -11,10 +11,10 @@ import java.util.Date;
 import java.util.List;
 
 public class Animation {
-	public int[] activityFre; //caseÆµÂÊ
-	public int[][] activityQueFre; //±ßµÄcaseÆµÂÊ
-	public List<AnimationCase>[] caseList; //caseÆµÂÊ
-	public List<AnimationCase>[][] caseQueList; //±ßµÄcaseÆµÂÊ
+	public int[] activityFre; //caseé¢‘ç‡
+	public int[][] activityQueFre; //è¾¹çš„caseé¢‘ç‡
+	public List<AnimationCase>[] caseList; //caseé¢‘ç‡
+	public List<AnimationCase>[][] caseQueList; //è¾¹çš„caseé¢‘ç‡
 	long frame;
 	
 	public class MyArrayList extends ArrayList<AnimationCase> {

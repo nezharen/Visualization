@@ -4,9 +4,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
-//event Àà
+//event ç±»
 public class Event {
-	//eventÊôĞÔ
+	//eventå±æ€§
 	String caseID;
 	String activity;
 	//String startDateString;
@@ -46,7 +46,7 @@ public class Event {
         return last;
     }
 	
-	//»î¶¯Ê±³¤
+	//æ´»åŠ¨æ—¶é•¿
 	public long getTime() {
 		long hours = 0;
 		
@@ -96,7 +96,7 @@ public class Event {
 	public String getResource() {
 		return resourceString;
 	}
-	//ÉèÖÃÊ±¼ä£¬¿¼ÂÇµ¥¸ö»ò¶à¸öÊ±¼äµÄÇé¿ö
+	//è®¾ç½®æ—¶é—´ï¼Œè€ƒè™‘å•ä¸ªæˆ–å¤šä¸ªæ—¶é—´çš„æƒ…å†µ
 	public void setDate(String dateString, String timeString) {
 		SimpleDateFormat sdf = new SimpleDateFormat(timeString);  
 		if (startDate == null) {
